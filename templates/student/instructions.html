@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Instructions &bull; {{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card card-glass p-4 p-md-5 border-0 shadow-lg">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+          <div>
+            <span class="badge bg-primary-subtle text-primary mb-1">{{ exam.subject }}</span>
+            <h3 class="fw-bold text-dark mb-0">{{ exam.title }}</h3>
+          </div>
+          <div class="text-end">
+            <span class="badge bg-light text-muted border px-3 py-2">
+              <i class="fas fa-clock text-warning me-1"></i> {{ exam.duration_minutes }} Minutes
+            </span>
+          </div>
+        </div>
+
+        <!-- Exam Overview Quick Details -->
+        <div class="row g-3 mb-4">
+          <div class="col-sm-4">
+            <div class="p-3 bg-light rounded-3 text-center border">
+              <small class="text-muted d-block">Questions</small>
+              <strong class="fs-5 text-dark">{{ exam.question_count }}</strong>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="p-3 bg-light rounded-3 text-center border">
+              <small class="text-muted d-block">Total Marks</small>
+              <strong class="fs-5 text-primary">{{ exam.total_marks }}</strong>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="p-3 bg-light rounded-3 text-center border">
+              <small class="text-muted d-block">Passing Cutoff</small>
+              <strong class="fs-5 text-success">{{ exam.passing_marks }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Critical Rules & Guidelines -->
+        <h5 class="fw-bold text-dark mb-3"><i class="fas fa-triangle-exclamation text-warning me-2"></i> Important Examination &amp; Proctoring Rules</h5>
+        <div class="bg-light p-4 rounded-3 border mb-4">
+          <ul class="list-unstyled d-flex flex-column gap-3 mb-0 text-muted" style="font-size: 0.92rem;">
+            <li class="d-flex align-items-start gap-2">
+              <i class="fas fa-camera text-primary mt-1"></i>
+              <span><strong>Webcam Mandatory:</strong> Your camera must remain operational throughout the entire duration.</span>
+            </li>
+            <li class="d-flex align-items-start gap-2">
+              <i class="fas fa-user text-primary mt-1"></i>
+              <span><strong>Solo Environment:</strong> You must be alone in a well-lit room. Multiple faces will trigger immediate high-severity violations.</span>
+            </li>
+            <li class="d-flex align-items-start gap-2">
+              <i class="fas fa-expand text-primary mt-1"></i>
+              <span><strong>Fullscreen Requirement:</strong> The exam will lock into fullscreen. Exiting fullscreen will be logged as an anomaly.</span>
+            </li>
+            <li class="d-flex align-items-start gap-2">
+              <i class="fas fa-window-restore text-primary mt-1"></i>
+              <span><strong>No Tab Switching:</strong> Switching tabs or navigating outside the browser window is strictly monitored.</span>
+            </li>
+            <li class="d-flex align-items-start gap-2">
+              <i class="fas fa-ban text-danger mt-1"></i>
+              <span><strong>Restricted Actions:</strong> Copying, pasting, cutting, and right-clicking are strictly disabled.</span>
+            </li>
+            <li class="d-flex align-items-start gap-2">
+              <i class="fas fa-hourglass-end text-warning mt-1"></i>
+              <span><strong>Automatic Submission:</strong> The examination will automatically submit when the countdown reaches 00:00.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Agreement Checkbox -->
+        <div class="form-check p-3 bg-white border rounded-3 mb-4">
+          <input class="form-check-input ms-1" type="checkbox" id="agreeCheck">
+          <label class="form-check-label ms-3 fw-semibold text-dark" for="agreeCheck">
+            I have read, understood, and agree to abide by all the examination and AI proctoring rules.
+          </label>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <a href="{{ url_for('student.exams') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Cancel
+          </a>
+          <a href="{{ url_for('exam.verify', exam_id=exam.id) }}" id="btnProceed" class="btn btn-primary px-4 py-2 disabled">
+            Proceed to Verification <i class="fas fa-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const check = document.getElementById('agreeCheck');
+  const btn = document.getElementById('btnProceed');
+  check.addEventListener('change', () => {
+    if (check.checked) {
+      btn.classList.remove('disabled');
+    } else {
+      btn.classList.add('disabled');
+    }
+  });
+});
+</script>
+{% endblock %}

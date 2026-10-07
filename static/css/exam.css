@@ -1,0 +1,472 @@
+/* ==========================================================================
+   EXAMINATION PORTAL & PROCTORING HUD STYLESHEET
+   Distraction-free, secure candidate testing interface
+   ========================================================================== */
+
+.exam-screen-body {
+  background-color: #0f172a;
+  color: #f8fafc;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow-x: hidden;
+}
+
+/* Top Security Header */
+.exam-header {
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.exam-title-badge {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* 3-Column Layout */
+.exam-layout-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr 340px;
+  height: calc(100vh - 65px);
+  overflow: hidden;
+}
+
+/* Left Pane: Question Palette */
+.exam-left-pane {
+  background: #1e293b;
+  border-right: 1px solid #334155;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-top: 1rem;
+}
+
+.palette-btn {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: 1px solid #475569;
+  background: #334155;
+  color: #cbd5e1;
+  transition: all 0.2s ease;
+}
+
+.palette-btn:hover {
+  transform: scale(1.05);
+}
+
+.palette-btn.current {
+  border: 2px solid #818cf8 !important;
+  box-shadow: 0 0 10px rgba(129, 140, 248, 0.5);
+}
+
+.palette-btn.answered {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+  border-color: #10b981 !important;
+}
+
+.palette-btn.marked {
+  background-color: #d97706 !important;
+  color: #ffffff !important;
+  border-color: #f59e0b !important;
+}
+
+.palette-btn.unanswered {
+  background-color: #334155;
+  color: #94a3b8;
+}
+
+.legend-container {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  font-size: 0.8rem;
+  border-top: 1px solid #334155;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  color: #94a3b8;
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+/* Center Pane: Active Question */
+.exam-center-pane {
+  background: #0f172a;
+  padding: 2rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.question-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  margin-bottom: 1.5rem;
+}
+
+.question-number-badge {
+  color: #818cf8;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.question-text {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.5;
+  margin-bottom: 1.75rem;
+}
+
+/* Options */
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.option-item {
+  background: #334155;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #e2e8f0;
+}
+
+.option-item:hover {
+  background: #3f4e66;
+  border-color: #64748b;
+}
+
+.option-item.selected {
+  background: rgba(79, 70, 229, 0.2);
+  border-color: #6366f1;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.option-prefix {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+.option-item.selected .option-prefix {
+  background: #6366f1;
+  color: #ffffff;
+}
+
+/* Controls */
+.question-controls {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+}
+
+/* Right Pane: AI Proctoring HUD & Timer */
+.exam-right-pane {
+  background: #1e293b;
+  border-left: 1px solid #334155;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+}
+
+/* Timer Widget */
+.timer-widget {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: var(--radius-md);
+  padding: 1.2rem;
+  text-align: center;
+}
+
+.timer-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #94a3b8;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.timer-display {
+  font-size: 2.2rem;
+  font-weight: 800;
+  font-family: monospace;
+  color: #10b981;
+  margin-top: 0.25rem;
+  letter-spacing: 0.05em;
+}
+
+.timer-display.warning {
+  color: #f59e0b;
+}
+
+.timer-display.danger {
+  color: #ef4444;
+  animation: pulse-danger 1s infinite;
+}
+
+/* Webcam Monitor Box */
+.webcam-hud-box {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+}
+
+.webcam-video-element {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  background-color: #000000;
+  display: block;
+}
+
+.webcam-overlay-status {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(4px);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.webcam-overlay-hud {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.95), transparent);
+  padding: 0.75rem 0.85rem 0.5rem;
+  font-size: 0.75rem;
+  color: #cbd5e1;
+}
+
+/* Risk Meter */
+.risk-meter-container {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: var(--radius-md);
+  padding: 1rem;
+}
+
+.risk-progress-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: #334155;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.risk-progress-fill {
+  height: 100%;
+  background: #10b981;
+  width: 0%;
+  transition: width 0.4s ease, background-color 0.4s ease;
+}
+
+/* Feed logs */
+.violation-mini-feed {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: var(--radius-md);
+  padding: 0.85rem;
+  flex-grow: 1;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.feed-item {
+  font-size: 0.75rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #1e293b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.feed-item:last-child {
+  border-bottom: none;
+}
+
+/* Fullscreen Alert Backdrop */
+#fullscreenOverlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Unwanted / Prohibited Device Region Overlay with Neon Gradient */
+.unwanted-region-highlight {
+  position: absolute;
+  border-radius: 8px;
+  pointer-events: none;
+  border: 3px solid #ef4444;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.7), inset 0 0 15px rgba(249, 115, 22, 0.4);
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.25) 0%, rgba(249, 115, 22, 0.15) 100%);
+  animation: pulse-danger 1.2s infinite;
+  z-index: 5;
+  transition: all 0.2s ease;
+}
+
+.unwanted-badge {
+  position: absolute;
+  top: -24px;
+  left: 0;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.hud-phone-warning-banner {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+  animation: pulse-danger 1s infinite;
+  z-index: 6;
+}
+
+.webcam-hud-box.phone-alert {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.6) !important;
+}
+
+/* Thermal Heat Map Canvas Overlay */
+.hud-heatmap-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+}
+
+/* Thermal Heat Map Warning Badge */
+.hud-heatmap-badge {
+  position: absolute;
+  bottom: 34px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #991b1b, #ea580c, #ca8a04);
+  color: #ffffff;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 15px rgba(234, 88, 12, 0.9), inset 0 0 6px rgba(254, 240, 138, 0.6);
+  border: 1px solid #fef08a;
+  animation: pulse-danger 0.9s infinite;
+  z-index: 7;
+  white-space: nowrap;
+}
+
+/* Sound Alarm Bar */
+.sound-alarm-bar {
+  background: #0f172a !important;
+  border: 1px solid #334155 !important;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.sound-alarm-bar.alarm-sounding {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+  animation: pulse-danger 0.6s infinite;
+}
+
+@keyframes bell-ring {
+  0% { transform: rotate(0); }
+  20% { transform: rotate(15deg); }
+  40% { transform: rotate(-15deg); }
+  60% { transform: rotate(10deg); }
+  80% { transform: rotate(-10deg); }
+  100% { transform: rotate(0); }
+}
+
+.alarm-bell-ringing {
+  animation: bell-ring 0.6s infinite !important;
+  color: #ef4444 !important;
+}

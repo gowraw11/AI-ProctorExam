@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Analytics Dashboard &bull; AI Proctor System{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <!-- Admin Sidebar Navigation -->
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-title">Main Navigation</div>
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link active">
+          <i class="fas fa-chart-pie sidebar-icon"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.exams') }}" class="sidebar-link">
+          <i class="fas fa-book-open sidebar-icon"></i>
+          <span>Exams</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.students') }}" class="sidebar-link">
+          <i class="fas fa-user-graduate sidebar-icon"></i>
+          <span>Students</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.attempts') }}" class="sidebar-link">
+          <i class="fas fa-list-check sidebar-icon"></i>
+          <span>Attempts</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.proctoring') }}" class="sidebar-link">
+          <i class="fas fa-video sidebar-icon"></i>
+          <span>Proctoring Monitor</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.reports') }}" class="sidebar-link">
+          <i class="fas fa-file-invoice sidebar-icon"></i>
+          <span>Reports &amp; Export</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-title mt-4">System</div>
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.settings') }}" class="sidebar-link">
+          <i class="fas fa-sliders sidebar-icon"></i>
+          <span>Settings</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('about') }}" class="sidebar-link">
+          <i class="fas fa-circle-info sidebar-icon"></i>
+          <span>Architecture</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger">
+          <i class="fas fa-power-off sidebar-icon"></i>
+          <span>Logout</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content Dashboard -->
+  <main class="dashboard-main">
+    <!-- Top Bar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+      <div>
+        <h3 class="fw-bold text-dark mb-1">Administrative Overview</h3>
+        <p class="text-muted small mb-0">Real-time candidate metrics, AI proctoring incidents, and evaluation analytics</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{{ url_for('admin.create_exam') }}" class="btn btn-primary btn-sm">
+          <i class="fas fa-plus me-1"></i> Create New Exam
+        </a>
+        <a href="{{ url_for('admin.export_pdf') }}" class="btn btn-outline-danger btn-sm">
+          <i class="fas fa-file-pdf me-1"></i> Download PDF Audit
+        </a>
+      </div>
+    </div>
+
+    <!-- Stat Cards Grid -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-xl-2">
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Students</div>
+            <div class="stat-value text-primary">{{ total_students }}</div>
+          </div>
+          <div class="stat-icon-wrapper bg-primary-subtle text-primary">
+            <i class="fas fa-users"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-xl-2">
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Total Exams</div>
+            <div class="stat-value text-info">{{ total_exams }}</div>
+          </div>
+          <div class="stat-icon-wrapper bg-info-subtle text-info">
+            <i class="fas fa-folder-open"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-xl-2">
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Attempts</div>
+            <div class="stat-value text-success">{{ total_attempts }}</div>
+          </div>
+          <div class="stat-icon-wrapper bg-success-subtle text-success">
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-xl-2">
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Average Score</div>
+            <div class="stat-value text-dark">{{ avg_score }}%</div>
+          </div>
+          <div class="stat-icon-wrapper bg-light text-dark border">
+            <i class="fas fa-chart-line"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-xl-2">
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Suspicious</div>
+            <div class="stat-value text-danger">{{ suspicious_count }}</div>
+          </div>
+          <div class="stat-icon-wrapper bg-danger-subtle text-danger">
+            <i class="fas fa-shield-virus"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-xl-2">
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Active Exams</div>
+            <div class="stat-value text-warning">{{ active_exams }}</div>
+          </div>
+          <div class="stat-icon-wrapper bg-warning-subtle text-warning">
+            <i class="fas fa-bullhorn"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row g-4 mb-4">
+      <!-- Pass / Fail Distribution -->
+      <div class="col-lg-4">
+        <div class="chart-container-card">
+          <div class="chart-header">
+            <h6 class="fw-bold mb-0"><i class="fas fa-chart-pie text-success me-2"></i> Pass / Fail Distribution</h6>
+          </div>
+          <div style="height: 230px; position: relative;">
+            <canvas id="passFailChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Risk Level Distribution -->
+      <div class="col-lg-4">
+        <div class="chart-container-card">
+          <div class="chart-header">
+            <h6 class="fw-bold mb-0"><i class="fas fa-shield-halved text-warning me-2"></i> Risk Score Profiles</h6>
+          </div>
+          <div style="height: 230px; position: relative;">
+            <canvas id="riskChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Proctoring Violations By Type -->
+      <div class="col-lg-4">
+        <div class="chart-container-card">
+          <div class="chart-header">
+            <h6 class="fw-bold mb-0"><i class="fas fa-bug text-danger me-2"></i> Incidents Logged by Type</h6>
+          </div>
+          <div style="height: 230px; position: relative;">
+            <canvas id="violationsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Candidate Attempts -->
+    <div class="card card-glass p-4 border-0 shadow-sm">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-clock-rotate-left text-primary me-2"></i> Recent Examination Attempts</h5>
+        <a href="{{ url_for('admin.attempts') }}" class="small fw-semibold text-primary">View All Attempts &rarr;</a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table custom-table mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Student Name</th>
+              <th>Exam Title</th>
+              <th>Date</th>
+              <th>Score</th>
+              <th>Result</th>
+              <th>Violations</th>
+              <th>Risk Level</th>
+              <th class="text-end">Audit</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for att in recent_attempts %}
+              <tr>
+                <td><code>#{{ att.id }}</code></td>
+                <td>
+                  <div class="fw-bold text-dark">{{ att.student.full_name if att.student else 'Unknown' }}</div>
+                  <small class="text-muted">{{ att.student.email if att.student else '' }}</small>
+                </td>
+                <td>{{ att.exam.title if att.exam else 'Exam' }}</td>
+                <td class="small text-muted">{{ att.started_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td><strong>{{ att.score }}</strong> ({{ att.percentage }}%)</td>
+                <td>
+                  {% if att.is_passed %}
+                    <span class="badge bg-success-subtle text-success">PASSED</span>
+                  {% else %}
+                    <span class="badge bg-danger-subtle text-danger">FAILED</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="badge bg-light text-dark border">{{ att.suspicious_activity_count }}</span>
+                </td>
+                <td>
+                  {% if att.proctoring_session %}
+                    <span class="badge badge-risk-{{ att.proctoring_session.risk_level.lower() }}">
+                      {{ att.proctoring_session.risk_level }} ({{ att.proctoring_session.risk_score }})
+                    </span>
+                  {% else %}
+                    <span class="badge bg-light text-muted">LOW</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <a href="{{ url_for('admin.proctoring_detail', attempt_id=att.id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-magnifying-glass-chart me-1"></i> Timeline
+                  </a>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="9" class="text-center text-muted py-4">No examination attempts logged yet.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  window.DashboardAnalytics.initCharts({
+    passFail: {
+      passed: {{ passed_count }},
+      failed: {{ failed_count }}
+    },
+    riskDist: {{ risk_distribution|tojson }},
+    violationTypes: {{ violation_types|tojson }}
+  });
+});
+</script>
+{% endblock %}

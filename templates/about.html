@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}About Project &amp; Architecture &bull; Online Examination &amp; Proctoring System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Header Banner -->
+  <div class="card card-glass p-4 p-md-5 mb-5 border-0 shadow-sm" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #fff;">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <span class="badge bg-primary px-3 py-1 mb-2">Final Year CS / MCA Capstone Project</span>
+        <h1 class="display-5 fw-bold text-white mb-2">AI-Powered Online Examination &amp; Proctoring System</h1>
+        <p class="lead text-light mb-0 fs-6">A Machine Learning Based Automated Invigilation and Assessment Infrastructure</p>
+      </div>
+      <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+        <span class="badge bg-success-subtle text-success border border-success px-3 py-2 fs-6">
+          <i class="fas fa-check-circle me-1"></i> Production Ready v1.0
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Main Documentation Column -->
+    <div class="col-lg-8">
+      <!-- Problem Statement & Objectives -->
+      <div class="card card-glass p-4 mb-4">
+        <h3 class="fw-bold text-dark mb-3"><i class="fas fa-bullseye text-primary me-2"></i> Problem Statement &amp; Objectives</h3>
+        <p class="text-muted">
+          Traditional online examinations suffer from vulnerabilities such as impersonation, unauthorized peer assistance, tab switching, and out-of-camera references. Manual remote proctoring via 1-on-1 human invigilation is expensive and unscalable.
+        </p>
+        <p class="text-muted">
+          <strong>Primary Objectives:</strong>
+        </p>
+        <ul class="text-muted mb-0">
+          <li>Automate continuous invigilation using localized, CPU-efficient Computer Vision algorithms.</li>
+          <li>Detect facial absence, multiple persons, diverted head pose, and gaze deviation.</li>
+          <li>Eliminate browser cheating via fullscreen locks, tab-switching interceptors, and clipboard disabling.</li>
+          <li>Calculate dynamic, calibrated risk scores while maintaining audit logs and photographic evidence for fair human oversight.</li>
+        </ul>
+      </div>
+
+      <!-- System Architecture Diagram (Visual SVG & Box Representation) -->
+      <div class="card card-glass p-4 mb-4">
+        <h3 class="fw-bold text-dark mb-3"><i class="fas fa-sitemap text-info me-2"></i> System Architecture</h3>
+        <p class="text-muted small mb-4">The architectural diagram below illustrates the end-to-end data flow between candidate browsers, the Flask application backend, the OpenCV ML engine, and the administrative dashboards.</p>
+
+        <div class="p-4 bg-light rounded-3 border text-center font-monospace" style="font-size: 0.85rem;">
+          <div class="row g-3 justify-content-center">
+            <!-- Client Tier -->
+            <div class="col-12">
+              <div class="p-3 bg-white rounded border border-primary shadow-sm">
+                <span class="badge bg-primary text-white mb-1">CLIENT TIER (HTML5 / ES6 JavaScript)</span>
+                <div class="small text-muted">Webcam Stream (MediaDevices) &bull; Frame Sampling (Canvas) &bull; Security Listeners (Fullscreen, VisibilityChange)</div>
+              </div>
+            </div>
+
+            <div class="col-12"><i class="fas fa-arrow-down text-muted fs-4"></i></div>
+
+            <!-- API / Gateway Tier -->
+            <div class="col-12">
+              <div class="p-3 bg-white rounded border border-secondary shadow-sm">
+                <span class="badge bg-dark text-white mb-1">APPLICATION TIER (Python 3.11+ / Flask REST Architecture)</span>
+                <div class="row g-2 mt-2">
+                  <div class="col-md-6">
+                    <div class="p-2 bg-light rounded border text-start">
+                      <strong>Exam Engine Service</strong>
+                      <div class="small text-muted">Session sync, Auto-saving, Countdown validation, Score calculation</div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="p-2 bg-light rounded border text-start">
+                      <strong>Proctoring Coordinator</strong>
+                      <div class="small text-muted">Frame ingest, Anomaly routing, Risk score evaluation</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12"><i class="fas fa-arrow-down text-muted fs-4"></i></div>
+
+            <!-- Engine & Storage Tier -->
+            <div class="col-md-6">
+              <div class="p-3 bg-white rounded border border-warning shadow-sm h-100">
+                <span class="badge bg-warning text-dark mb-1">COMPUTER VISION / ML PIPELINE</span>
+                <ul class="list-unstyled small text-muted text-start mt-2 mb-0">
+                  <li>&bull; Haar Cascade Face Detector</li>
+                  <li>&bull; Head Pose Estimator (Yaw/Pitch)</li>
+                  <li>&bull; Eye Centroid Gaze Tracker</li>
+                  <li>&bull; Snapshot Evidence Archiver</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="p-3 bg-white rounded border border-success shadow-sm h-100">
+                <span class="badge bg-success text-white mb-1">DATA PERSISTENCE &amp; REPORTING</span>
+                <ul class="list-unstyled small text-muted text-start mt-2 mb-0">
+                  <li>&bull; Relational Database (SQLite / Postgres)</li>
+                  <li>&bull; Incident Audit Trail &amp; Snapshots</li>
+                  <li>&bull; ReportLab PDF Audit Generator</li>
+                  <li>&bull; Chart.js Visual Analytics</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ML Methodology -->
+      <div class="card card-glass p-4 mb-4">
+        <h3 class="fw-bold text-dark mb-3"><i class="fas fa-microchip text-accent-purple me-2"></i> Computer Vision Methodology</h3>
+        <div class="accordion" id="mlAccordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ml1">
+                1. Face Detection &amp; People Counting (OpenCV)
+              </button>
+            </h2>
+            <div id="ml1" class="accordion-collapse collapse show" data-bs-parent="#mlAccordion">
+              <div class="accordion-body text-muted small">
+                Uses OpenCV's optimized Haar Feature-based Cascade Classifiers. Incoming frames are resized and histogram-equalized. If <code>face_count == 0</code> for consecutive cycles, a <code>NO_FACE</code> event triggers. If <code>face_count > 1</code>, a <code>MULTIPLE_FACES</code> high-severity violation is logged and snapshot evidence is captured.
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ml2">
+                2. Head Pose &amp; Rotation Estimation
+              </button>
+            </h2>
+            <div id="ml2" class="accordion-collapse collapse" data-bs-parent="#mlAccordion">
+              <div class="accordion-body text-muted small">
+                Analyzes facial aspect ratios and horizontal asymmetry of eye coordinates relative to the face box boundary. Consecutive sustained off-center poses trigger <code>LOOKING_AWAY</code> warnings without penalizing natural micro-glances.
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ml3">
+                3. Eye Gaze Approximation
+              </button>
+            </h2>
+            <div id="ml3" class="accordion-collapse collapse" data-bs-parent="#mlAccordion">
+              <div class="accordion-body text-muted small">
+                Extracts the ocular region, applies a Gaussian blur, and calculates the minimum intensity location representing the pupil. Relative horizontal displacement provides an approximate gaze vector (SCREEN / LEFT / RIGHT).
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advantages, Limitations & Future Scope -->
+      <div class="card card-glass p-4">
+        <h3 class="fw-bold text-dark mb-3"><i class="fas fa-compass text-success me-2"></i> Scope &amp; Evaluation</h3>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <h6 class="fw-bold text-success"><i class="fas fa-plus-circle me-1"></i> Key Advantages</h6>
+            <ul class="text-muted small">
+              <li>Low computational footprint (runs on normal student laptops without GPU).</li>
+              <li>Minimal network bandwidth via periodic frame sampling.</li>
+              <li>Ethical proctoring policy: assisted flags rather than automatic disqualifications.</li>
+              <li>Comprehensive candidate audit timeline with screenshot evidence.</li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <h6 class="fw-bold text-warning"><i class="fas fa-triangle-exclamation me-1"></i> Limitations &amp; Future Scope</h6>
+            <ul class="text-muted small">
+              <li>Lighting variations and reflections from spectacles may affect gaze precision.</li>
+              <li>Future upgrade: Deep learning models (e.g., MediaPipe Face Mesh) for fine 3D iris tracking.</li>
+              <li>Future upgrade: Secondary mobile phone camera pairing for 360-degree room monitoring.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project Metadata & Quick Specs Sidebar -->
+    <div class="col-lg-4">
+      <div class="card card-glass p-4 mb-4">
+        <h5 class="fw-bold text-dark mb-3"><i class="fas fa-layer-group text-primary me-2"></i> Technology Stack</h5>
+        <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small">
+          <li class="d-flex justify-content-between border-bottom pb-2">
+            <span class="text-muted">Backend Framework</span>
+            <span class="fw-semibold">Flask 3.x (Python)</span>
+          </li>
+          <li class="d-flex justify-content-between border-bottom pb-2">
+            <span class="text-muted">Computer Vision</span>
+            <span class="fw-semibold">OpenCV 4.x / 5.x</span>
+          </li>
+          <li class="d-flex justify-content-between border-bottom pb-2">
+            <span class="text-muted">ORM &amp; Database</span>
+            <span class="fw-semibold">SQLAlchemy / SQLite</span>
+          </li>
+          <li class="d-flex justify-content-between border-bottom pb-2">
+            <span class="text-muted">Frontend</span>
+            <span class="fw-semibold">Bootstrap 5, Chart.js</span>
+          </li>
+          <li class="d-flex justify-content-between border-bottom pb-2">
+            <span class="text-muted">Authentication</span>
+            <span class="fw-semibold">Flask-Login, Werkzeug</span>
+          </li>
+          <li class="d-flex justify-content-between">
+            <span class="text-muted">PDF Generation</span>
+            <span class="fw-semibold">ReportLab</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card card-glass p-4 text-center">
+        <h5 class="fw-bold text-dark mb-2">Ready to test?</h5>
+        <p class="text-muted small mb-3">Experience the full end-to-end examination and proctoring flow live in your browser.</p>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary w-100">
+          <i class="fas fa-sign-in-alt me-1"></i> Log In to Test System
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

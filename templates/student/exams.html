@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Available Examinations &bull; Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">Available Examinations</h3>
+      <p class="text-muted small mb-0">Select an examination to read instructions and proceed with identity verification</p>
+    </div>
+    <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+    </a>
+  </div>
+
+  <div class="row g-4">
+    {% for ex in exams %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card card-glass card-hover h-100 p-4 border-0 shadow-sm d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="badge bg-primary-subtle text-primary fw-semibold">{{ ex.subject }}</span>
+            <span class="badge bg-light text-muted border"><i class="fas fa-clock me-1"></i> {{ ex.duration_minutes }} Mins</span>
+          </div>
+
+          <h5 class="fw-bold text-dark mb-2">{{ ex.title }}</h5>
+          <p class="text-muted small flex-grow-1">{{ ex.description or 'Official assessment with automated invigilation.' }}</p>
+
+          <div class="bg-light p-3 rounded-3 mb-3 small">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Total Questions:</span>
+              <strong class="text-dark">{{ ex.question_count }}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Total Marks:</span>
+              <strong class="text-dark">{{ ex.total_marks }}</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">Passing Cutoff:</span>
+              <strong class="text-success">{{ ex.passing_marks }} Marks</strong>
+            </div>
+          </div>
+
+          <div>
+            {% if ex.user_attempt and ex.user_attempt.status in ['submitted', 'auto_submitted'] %}
+              <div class="d-flex align-items-center justify-content-between">
+                <span class="badge bg-success-subtle text-success py-2 px-3"><i class="fas fa-check-circle me-1"></i> Completed</span>
+                <a href="{{ url_for('student.result', attempt_id=ex.user_attempt.id) }}" class="btn btn-outline-primary btn-sm">
+                  View Result
+                </a>
+              </div>
+            {% else %}
+              <a href="{{ url_for('exam.instructions', exam_id=ex.id) }}" class="btn btn-primary w-100 fw-semibold">
+                <i class="fas fa-play me-1"></i> Begin Examination
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="col-12">
+        <div class="card p-5 text-center text-muted">
+          <i class="fas fa-folder-open fs-1 mb-3"></i>
+          <h5>No active examinations available right now</h5>
+          <p class="small mb-0">Check back later or contact your institution administrator.</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

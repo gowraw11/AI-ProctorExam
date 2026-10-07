@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+
+{% block title %}Examination &bull; {{ exam.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/exam.css') }}">
+{% endblock %}
+
+{% block body_class %}exam-screen-body{% endblock %}
+
+{% block navbar %}
+<!-- Top Distraction-Free Header Bar -->
+<header class="exam-header">
+  <div class="d-flex align-items-center gap-3">
+    <div class="brand-icon-badge" style="width: 32px; height: 32px; font-size: 0.9rem;">
+      <i class="fas fa-shield-halved"></i>
+    </div>
+    <div>
+      <div class="exam-title-badge">{{ exam.title }}</div>
+      <small class="text-secondary">{{ exam.subject }} &bull; Candidate: <strong>{{ current_user.full_name }}</strong></small>
+    </div>
+  </div>
+
+  <div class="d-flex align-items-center gap-3">
+    <!-- Live Monitoring Indicator Pill -->
+    <div class="d-flex align-items-center gap-2 bg-dark px-3 py-1 rounded-pill border border-secondary border-opacity-50">
+      <span class="live-indicator"></span>
+      <span class="small fw-semibold text-light" style="font-size: 0.78rem;">AI Invigilator Active</span>
+    </div>
+
+    <!-- Submit Button (Direct to Confirmation Modal) -->
+    <button type="button" id="btnTopSubmit" class="btn btn-danger btn-sm px-3 fw-bold" onclick="window.examMgr.prepareSubmitModal()">
+      <i class="fas fa-flag-checkered me-1"></i> Submit Exam
+    </button>
+  </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="exam-layout-grid">
+  <!-- LEFT COLUMN: Question Palette & Navigation -->
+  <aside class="exam-left-pane">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="fw-bold text-light mb-0" style="font-size: 0.85rem;">QUESTION PALETTE</h6>
+      <span class="badge bg-secondary" style="font-size: 0.75rem;">Total: {{ questions|length }}</span>
+    </div>
+
+    <!-- Quick stats strip -->
+    <div class="d-flex justify-content-between text-secondary py-2 border-bottom border-secondary border-opacity-25" style="font-size: 0.75rem;">
+      <span>Answered: <strong class="text-success" id="countAnswered">0</strong></span>
+      <span>Review: <strong class="text-warning" id="countMarked">0</strong></span>
+      <span>Remaining: <strong class="text-light" id="countUnanswered">{{ questions|length }}</strong></span>
+    </div>
+
+    <!-- Numbered Palette Grid -->
+    <div class="palette-grid">
+      {% for q in questions %}
+        <button type="button" class="palette-btn" data-question-id="{{ q.id }}" data-index="{{ loop.index0 }}">
+          {{ loop.index }}
+        </button>
+      {% endfor %}
+    </div>
+
+    <!-- Legend -->
+    <div class="legend-container">
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #059669;"></div>
+        <span>Answered</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #d97706;"></div>
+        <span>Marked for Review</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #334155;"></div>
+        <span>Unanswered</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="border: 2px solid #818cf8; background-color: #334155;"></div>
+        <span>Current Question</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CENTER COLUMN: Active Question & Radio Options -->
+  <main class="exam-center-pane">
+    {% for q in questions %}
+      <div class="question-block" id="qBlock_{{ loop.index0 }}" data-question-id="{{ q.id }}" style="display: none;">
+        <div class="question-card">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="question-number-badge">Question {{ loop.index }} of {{ questions|length }}</span>
+            <span class="badge bg-dark text-info border border-secondary" style="font-size: 0.75rem;">
+              {{ q.marks }} Marks {% if q.negative_marks %}(-{{ q.negative_marks }} Neg){% endif %}
+            </span>
+          </div>
+
+          <!-- Question Text -->
+          <div class="question-text">
+            {{ q.question_text }}
+          </div>
+
+          <!-- Options A, B, C, D -->
+          <div class="options-list">
+            <div class="option-item {% if saved_answers.get(q.id) == 'A' %}selected{% endif %}" data-option="A">
+              <div class="option-prefix">A</div>
+              <div class="flex-grow-1">{{ q.option_a }}</div>
+            </div>
+            <div class="option-item {% if saved_answers.get(q.id) == 'B' %}selected{% endif %}" data-option="B">
+              <div class="option-prefix">B</div>
+              <div class="flex-grow-1">{{ q.option_b }}</div>
+            </div>
+            <div class="option-item {% if saved_answers.get(q.id) == 'C' %}selected{% endif %}" data-option="C">
+              <div class="option-prefix">C</div>
+              <div class="flex-grow-1">{{ q.option_c }}</div>
+            </div>
+            <div class="option-item {% if saved_answers.get(q.id) == 'D' %}selected{% endif %}" data-option="D">
+              <div class="option-prefix">D</div>
+              <div class="flex-grow-1">{{ q.option_d }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+    <!-- Navigation Controls -->
+    <div class="question-controls">
+      <div class="d-flex gap-2">
+        <button type="button" id="btnPrev" class="btn btn-outline-light px-3" onclick="window.examMgr.prevQuestion()">
+          <i class="fas fa-chevron-left me-1"></i> Previous
+        </button>
+        <button type="button" id="btnMarkReview" class="btn btn-outline-warning px-3" onclick="window.examMgr.toggleMarkForReview()">
+          <i class="fas fa-bookmark me-1"></i> Mark for Review
+        </button>
+        <button type="button" id="btnClear" class="btn btn-outline-secondary px-3" onclick="window.examMgr.clearAnswer()">
+          <i class="fas fa-eraser me-1"></i> Clear Response
+        </button>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="button" id="btnNext" class="btn btn-primary px-4 fw-semibold" onclick="window.examMgr.nextQuestion()">
+          Next <i class="fas fa-chevron-right ms-1"></i>
+        </button>
+        <button type="button" class="btn btn-success px-4 fw-bold" onclick="window.examMgr.prepareSubmitModal()">
+          Submit Exam <i class="fas fa-check ms-1"></i>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- RIGHT COLUMN: AI Proctoring HUD & Countdown Timer -->
+  <aside class="exam-right-pane">
+    <!-- Timer Widget -->
+    <div class="timer-widget">
+      <div class="timer-label"><i class="fas fa-stopwatch me-1 text-primary"></i> Time Remaining</div>
+      <div class="timer-display" id="examTimerDisplay">--:--</div>
+    </div>
+
+    <!-- Live Webcam Monitoring Box -->
+    <div class="webcam-hud-box" id="webcamHudBox">
+      <video id="proctoringVideo" class="webcam-video-element" autoplay playsinline muted></video>
+
+      <div class="webcam-overlay-status" id="hudFaceStatus">
+        <span class="live-indicator"></span>
+        <span>Initializing...</span>
+      </div>
+
+      <!-- Thermal Heat Map Canvas Overlay -->
+      <canvas id="hudHeatmapCanvas" class="hud-heatmap-canvas" style="display: none;"></canvas>
+
+      <!-- Thermal Heat Map Warning Badge -->
+      <div id="hudHeatmapBadge" class="hud-heatmap-badge" style="display: none;">
+        <i class="fas fa-fire me-1 text-danger"></i> THERMAL HEAT MAP ACTIVE
+      </div>
+
+      <!-- Unwanted Object Highlight Region Box with Gradient Border -->
+      <div id="unwantedRegionBox" class="unwanted-region-highlight" style="display: none;">
+        <span class="unwanted-badge"><i class="fas fa-triangle-exclamation"></i> UNWANTED: PHONE</span>
+      </div>
+
+      <!-- Mobile Phone Warning Banner -->
+      <div id="hudPhoneBanner" class="hud-phone-warning-banner" style="display: none;">
+        <i class="fas fa-mobile-screen-button me-1"></i> PHONE DETECTED
+      </div>
+
+      <div class="webcam-overlay-hud">
+        <div class="d-flex justify-content-between mb-1" id="hudHeadStatus">
+          <span><i class="fas fa-arrows-alt me-1"></i> Facing: CENTER</span>
+        </div>
+        <div class="d-flex justify-content-between text-secondary" style="font-size: 0.7rem;">
+          <span><i class="fas fa-shield-alt text-success me-1"></i> AI Surveillance</span>
+          <span id="hudPhoneStatus" class="text-success"><i class="fas fa-mobile-screen-button me-1"></i> No Phone</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sound Alarm Controls & Status Bar -->
+    <div class="sound-alarm-bar d-flex justify-content-between align-items-center px-2 py-1 bg-dark rounded border border-secondary border-opacity-25 mt-2">
+      <div class="d-flex align-items-center gap-2">
+        <i class="fas fa-bell text-warning alarm-bell-active" id="alarmBellIcon"></i>
+        <span class="small text-light" style="font-size: 0.72rem;">Proctor Alarm:</span>
+        <span class="badge bg-danger text-white" id="alarmStatusBadge" style="font-size: 0.65rem;">LOUD ON</span>
+      </div>
+      <div class="d-flex align-items-center gap-1">
+        <button type="button" id="btnTestSound" class="btn btn-sm btn-outline-warning py-0 px-2" style="font-size: 0.68rem;" onclick="window.proctorClient.testAlarmSound()" title="Test loud alarm siren">
+          <i class="fas fa-volume-high me-1"></i> Test Siren
+        </button>
+        <button type="button" id="btnToggleSound" class="btn btn-sm btn-outline-light py-0 px-2" style="font-size: 0.68rem;" onclick="window.proctorClient.toggleSoundAlarm()" title="Mute/Unmute sound alarm">
+          <i class="fas fa-volume-xmark" id="toggleSoundIcon"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Demo Test Trigger for Presentation -->
+    <div class="text-center mt-2">
+      <button type="button" class="btn btn-outline-danger btn-sm w-100 py-1" style="font-size: 0.72rem; border-style: dashed;" onclick="window.proctorClient.testTriggerPhone()">
+        <i class="fas fa-fire me-1 text-warning"></i> Test: Phone Detect + Heat Map + Loud Alarm
+      </button>
+    </div>
+
+    <!-- Live Proctoring Risk Meter -->
+    <div class="risk-meter-container">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="small fw-semibold text-secondary">INTEGRITY RISK</span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge badge-risk-low" id="hudRiskLevel">LOW</span>
+          <span class="text-light fw-bold font-monospace" id="hudRiskScore">0</span>
+        </div>
+      </div>
+      <div class="risk-progress-bar">
+        <div class="risk-progress-fill" id="hudRiskFill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- Real-Time Activity Feed -->
+    <div class="violation-mini-feed">
+      <div class="small fw-bold text-secondary text-uppercase mb-2" style="font-size: 0.7rem;">
+        <i class="fas fa-list-check me-1"></i> Proctoring Event Feed
+      </div>
+      <div id="hudViolationFeed">
+        <!-- Dynamically populated by ProctoringClient -->
+        <div class="feed-item text-secondary">
+          <span>Session securely initialized</span>
+          <span class="badge bg-secondary">OK</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- Fullscreen Exit Recovery Overlay -->
+<div id="fullscreenOverlay">
+  <div class="card bg-dark text-white p-4 p-md-5 rounded-4 text-center border-danger border-2 max-w-500 shadow-lg">
+    <div class="display-4 text-danger mb-3"><i class="fas fa-expand"></i></div>
+    <h3 class="fw-bold mb-2">Fullscreen Mode Exited</h3>
+    <p class="text-secondary small mb-4">
+      Security regulations require this examination to be taken in fullscreen mode. This exit event has been logged in your audit record.
+    </p>
+    <button type="button" class="btn btn-primary btn-lg fw-bold px-4" onclick="window.proctorClient.requestFullscreen()">
+      <i class="fas fa-arrow-up-right-from-square me-2"></i> Return to Fullscreen
+    </button>
+  </div>
+</div>
+
+<!-- Submission Confirmation Modal -->
+<div class="modal fade" id="confirmSubmitModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border-secondary">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title fw-bold"><i class="fas fa-clipboard-check text-success me-2"></i> Confirm Examination Submission</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="text-light mb-3">Are you sure you want to finish and submit your exam? Once submitted, your answers will be finalized.</p>
+
+        <div class="bg-secondary bg-opacity-25 p-3 rounded-3 mb-3">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-secondary">Questions Answered:</span>
+            <strong class="text-success fs-5" id="modalAnsweredCount">0</strong>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-secondary">Questions Unanswered:</span>
+            <strong class="text-warning fs-5" id="modalUnansweredCount">0</strong>
+          </div>
+        </div>
+
+        <small class="text-secondary d-block"><i class="fas fa-info-circle me-1"></i> Your proctoring integrity score and exam results will be calculated immediately.</small>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel &amp; Continue Test</button>
+        <button type="button" class="btn btn-success fw-bold px-4" onclick="window.examMgr.submitExam(false)">
+          <i class="fas fa-check me-1"></i> Yes, Submit Now
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden fallback form for submission -->
+<form id="finalSubmitForm" method="POST" action="{{ url_for('exam.submit_exam', exam_id=exam.id) }}" style="display: none;"></form>
+{% endblock %}
+
+{% block footer %}<!-- Distraction-free: No footer rendered during exam -->{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/proctoring.js') }}"></script>
+<script src="{{ url_for('static', filename='js/exam.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize AI Proctoring Client
+  window.proctorClient = new ProctoringClient({
+    attemptId: {{ attempt.id }},
+    frameInterval: {{ frame_interval }},
+    demoMode: {{ 'true' if demo_mode else 'false' }},
+    videoId: 'proctoringVideo'
+  });
+
+  // Start webcam and frame analysis
+  window.proctorClient.startCamera();
+
+  // Initialize Exam Manager
+  window.examMgr = new ExamManager({
+    examId: {{ exam.id }},
+    attemptId: {{ attempt.id }},
+    totalQuestions: {{ questions|length }},
+    remainingSeconds: {{ remaining_seconds }},
+    savedAnswers: {{ saved_answers|tojson }}
+  });
+
+  // Proactively prime and unlock audio on any first user interaction
+  const primeAudio = () => {
+    if (window.proctorClient) {
+      window.proctorClient.initAudio();
+    }
+  };
+  ['click', 'pointerdown', 'keydown', 'touchstart'].forEach(evt => {
+    window.addEventListener(evt, primeAudio, { once: true, passive: true });
+  });
+
+  // Request fullscreen automatically on initial click if supported
+  document.body.addEventListener('click', function reqFsOnce() {
+    if (!document.fullscreenElement) {
+      window.proctorClient.requestFullscreen();
+    }
+    document.body.removeEventListener('click', reqFsOnce);
+  }, { once: true });
+});
+</script>
+
+<!-- Embedded Loud Security Siren Audio Element -->
+<audio id="proctorAlarmAudio" src="{{ url_for('static', filename='audio/alarm_siren.wav') }}" preload="auto"></audio>
+{% endblock %}

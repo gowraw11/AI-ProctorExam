@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In &bull; AI Proctor Examination Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5 my-auto">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card card-glass p-4 p-md-5 border-0 shadow-lg">
+        <div class="text-center mb-4">
+          <div class="brand-icon-badge mx-auto mb-3" style="width: 48px; height: 48px; font-size: 1.3rem;">
+            <i class="fas fa-lock"></i>
+          </div>
+          <h3 class="fw-bold text-dark">Portal Authentication</h3>
+          <p class="text-muted small">Sign in to access your examinations or administrative console</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.login') }}">
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-secondary small">Email Address</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted border-end-0"><i class="fas fa-envelope"></i></span>
+              <input type="email" name="email" id="loginEmail" class="form-control border-start-0" placeholder="name@example.com" required autofocus>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-secondary small">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted border-end-0"><i class="fas fa-key"></i></span>
+              <input type="password" name="password" id="loginPassword" class="form-control border-start-0" placeholder="••••••••" required>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="remember" id="rememberMe">
+              <label class="form-check-label text-muted small" for="rememberMe">Remember session</label>
+            </div>
+            <a href="{{ url_for('auth.register') }}" class="small text-primary fw-semibold">New student? Register</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mb-3">
+            <i class="fas fa-sign-in-alt me-2"></i> Log In to Portal
+          </button>
+        </form>
+
+        <!-- Quick Demo Fill Helpers -->
+        <div class="pt-3 border-top text-center">
+          <small class="text-muted d-block mb-2 fw-semibold">QUICK DEMO ONE-CLICK CREDENTIALS</small>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline-primary flex-fill" onclick="fillCreds('admin@example.com', 'Admin@123')">
+              <i class="fas fa-user-shield me-1"></i> Admin Demo
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="fillCreds('student@example.com', 'Student@123')">
+              <i class="fas fa-user-graduate me-1"></i> Student Demo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function fillCreds(email, password) {
+  document.getElementById('loginEmail').value = email;
+  document.getElementById('loginPassword').value = password;
+}
+</script>
+{% endblock %}

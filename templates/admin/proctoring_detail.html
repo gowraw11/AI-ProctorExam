@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Proctoring Audit &bull; Attempt #{{ attempt.id }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Top Bar -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+      <span class="badge bg-primary-subtle text-primary mb-1">PROCTORING AUDIT LOG</span>
+      <h3 class="fw-bold text-dark mb-0">Timeline &amp; Photographic Evidence</h3>
+      <p class="text-muted small mb-0">Candidate: <strong>{{ attempt.student.full_name }}</strong> ({{ attempt.student.email }}) &bull; Exam: <strong>{{ attempt.exam.title }}</strong></p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('admin.proctoring') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i> Back to Monitor
+      </a>
+      <a href="{{ url_for('admin.export_pdf') }}" class="btn btn-outline-danger btn-sm">
+        <i class="fas fa-file-pdf me-1"></i> PDF Report
+      </a>
+    </div>
+  </div>
+
+  <!-- Overview Summary Card -->
+  <div class="card card-glass p-4 mb-4 border-0 shadow-sm">
+    <div class="row g-4 align-items-center">
+      <div class="col-md-3 text-center border-end">
+        <small class="text-muted text-uppercase fw-bold d-block mb-1">Calculated Risk Score</small>
+        <div class="display-4 fw-bold font-monospace text-{% if session and session.risk_score >= 51 %}danger{% elif session and session.risk_score >= 21 %}warning{% else %}success{% endif %}">
+          {{ session.risk_score if session else 0 }}
+        </div>
+        {% if session %}
+          <span class="badge badge-risk-{{ session.risk_level.lower() }} fs-6 mt-1">{{ session.risk_level }} RISK</span>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6 border-end small">
+        <div class="row g-2">
+          <div class="col-sm-6">
+            <span class="text-muted d-block">Candidate Reg ID:</span>
+            <strong>{{ attempt.student.registration_number or 'N/A' }}</strong>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted d-block">Test Score:</span>
+            <strong>{{ attempt.score }} / {{ attempt.exam.total_marks }} ({{ attempt.percentage }}%)</strong>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted d-block">Session Started:</span>
+            <span>{{ attempt.started_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted d-block">Session Ended:</span>
+            <span>{{ attempt.submitted_at.strftime('%Y-%m-%d %H:%M:%S') if attempt.submitted_at else 'In Progress' }}</span>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted d-block">Duration Taken:</span>
+            <span>{{ attempt.formatted_time_taken }}</span>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted d-block">Administrative Status:</span>
+            <strong class="text-primary">{{ session.final_status if session else 'CLEARED' }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Violation Count Pills -->
+      <div class="col-md-3">
+        <small class="text-muted text-uppercase fw-bold d-block mb-2">Logged Incident Breakdown</small>
+        <div class="d-flex flex-wrap gap-1">
+          {% for ev_type, count in event_counts.items() %}
+            <span class="badge bg-light text-dark border small">
+              {{ ev_type.replace('_', ' ') }}: <strong>{{ count }}</strong>
+            </span>
+          {% else %}
+            <span class="text-success small"><i class="fas fa-check-circle me-1"></i> Clean session</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visual Chronological Timeline -->
+  <div class="card card-glass p-4 border-0 shadow-sm mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h5 class="fw-bold text-dark mb-0"><i class="fas fa-timeline text-primary me-2"></i> Chronological Proctoring Events</h5>
+      <span class="badge bg-light text-dark border">{{ events|length }} Total Incidents</span>
+    </div>
+
+    {% if events %}
+      <div class="timeline-container">
+        <!-- Start Node -->
+        <div class="timeline-item">
+          <div class="timeline-dot LOW"></div>
+          <div class="timeline-card bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong class="text-dark"><i class="fas fa-play text-success me-1"></i> Examination Started &amp; Identity Verified</strong>
+                <div class="text-muted small">Candidate entered test environment and webcam monitoring initialized.</div>
+              </div>
+              <span class="timeline-time">{{ attempt.started_at.strftime('%H:%M:%S') }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Anomaly Events Nodes -->
+        {% for ev in events %}
+          <div class="timeline-item">
+            <div class="timeline-dot {{ ev.severity }}"></div>
+            <div class="timeline-card">
+              <div class="d-flex flex-wrap justify-content-between align-items-center mb-1">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge bg-{{ 'danger' if ev.severity in ['HIGH', 'CRITICAL'] else ('warning text-dark' if ev.severity == 'MEDIUM' else 'info') }}">
+                    {{ ev.severity }}
+                  </span>
+                  <strong class="text-dark">{{ ev.event_type.replace('_', ' ') }}</strong>
+                  {% if ev.is_demo %}
+                    <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">DEMO SIMULATION</span>
+                  {% endif %}
+                </div>
+                <div class="timeline-time font-monospace">{{ ev.formatted_time }}</div>
+              </div>
+
+              <p class="text-muted small mb-2">{{ ev.description }}</p>
+
+              <div class="d-flex justify-content-between align-items-center pt-2 border-top small text-muted">
+                <span>Algorithm Confidence: <strong>{{ (ev.confidence * 100)|round|int }}%</strong></span>
+
+                {% if ev.screenshot_path %}
+                  <button type="button" class="btn btn-sm btn-outline-danger" onclick="viewEvidence('{{ url_for('uploaded_file', filename=ev.screenshot_path.replace('uploads/', '')) }}', '{{ ev.event_type }}', '{{ ev.formatted_time }}')">
+                    <i class="fas fa-camera me-1"></i> View Photographic Evidence
+                  </button>
+                {% else %}
+                  <span class="text-secondary small"><i class="fas fa-shield-alt me-1"></i> Telemetry Logged</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+
+        <!-- End Node -->
+        {% if attempt.submitted_at %}
+          <div class="timeline-item">
+            <div class="timeline-dot LOW"></div>
+            <div class="timeline-card bg-light">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong class="text-dark"><i class="fas fa-flag-checkered text-primary me-1"></i> Examination Submitted</strong>
+                  <div class="text-muted small">Status: {{ attempt.status.upper() }} &bull; Proctoring session closed.</div>
+                </div>
+                <span class="timeline-time">{{ attempt.submitted_at.strftime('%H:%M:%S') }}</span>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="p-5 text-center text-muted">
+        <i class="fas fa-shield-check text-success fs-1 mb-2 d-block"></i>
+        <h5>Perfect Session Record</h5>
+        <p class="small mb-0">No suspicious anomalies or security deviations were flagged during this attempt.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Modal to Inspect Photographic Evidence -->
+<div class="modal fade" id="evidenceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-dark text-white border-secondary">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title fw-bold" id="modalEvidenceTitle">
+          <i class="fas fa-camera text-danger me-2"></i> Photographic Evidence Snapshot
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center p-3">
+        <div class="bg-black rounded-3 p-2 mb-2">
+          <img id="modalEvidenceImg" src="" alt="Evidence" class="img-fluid rounded border border-secondary" style="max-height: 480px;">
+        </div>
+        <small class="text-secondary" id="modalEvidenceMeta">Captured automatically by computer vision security trigger.</small>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function viewEvidence(url, eventType, timestamp) {
+  document.getElementById('modalEvidenceImg').src = url;
+  document.getElementById('modalEvidenceTitle').innerHTML = `<i class="fas fa-camera text-danger me-2"></i> Evidence: ${eventType.replace('_', ' ')} (${timestamp})`;
+  const modal = new bootstrap.Modal(document.getElementById('evidenceModal'));
+  modal.show();
+}
+</script>
+{% endblock %}

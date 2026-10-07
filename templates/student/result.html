@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Result Analysis &bull; {{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Top Outcome Banner -->
+  <div class="card card-glass p-4 p-md-5 mb-4 border-0 shadow-sm text-center" style="background: linear-gradient(135deg, {% if is_passed %}#065f46, #047857{% else %}#7f1d1d, #991b1b{% endif %}); color: #fff;">
+    <div class="max-w-600 mx-auto">
+      <div class="display-3 mb-2">
+        {% if is_passed %}
+          <i class="fas fa-award text-warning"></i>
+        {% else %}
+          <i class="fas fa-circle-xmark text-danger-subtle"></i>
+        {% endif %}
+      </div>
+      <h1 class="fw-bold mb-1">
+        {% if is_passed %}CONGRATULATIONS! YOU PASSED{% else %}EXAMINATION NOT CLEARED{% endif %}
+      </h1>
+      <p class="text-white text-opacity-75 mb-3">{{ exam.title }} &bull; Subject: {{ exam.subject }}</p>
+
+      <div class="d-inline-flex align-items-center gap-3 bg-black bg-opacity-25 px-4 py-2 rounded-pill">
+        <span>Score: <strong>{{ attempt.score }} / {{ exam.total_marks }}</strong></span>
+        <span>&bull;</span>
+        <span>Percentage: <strong>{{ attempt.percentage }}%</strong></span>
+        <span>&bull;</span>
+        <span>Cutoff: <strong>{{ exam.passing_marks }} Marks</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance & Proctoring Metrics -->
+  <div class="row g-4 mb-4">
+    <!-- Question Breakdown Stats -->
+    <div class="col-md-3 col-6">
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Correct Answers</div>
+          <div class="stat-value text-success">{{ correct_count }}</div>
+        </div>
+        <div class="stat-icon-wrapper bg-success-subtle text-success">
+          <i class="fas fa-check"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Incorrect Answers</div>
+          <div class="stat-value text-danger">{{ incorrect_count }}</div>
+        </div>
+        <div class="stat-icon-wrapper bg-danger-subtle text-danger">
+          <i class="fas fa-xmark"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Unanswered</div>
+          <div class="stat-value text-muted">{{ unanswered_count }}</div>
+        </div>
+        <div class="stat-icon-wrapper bg-secondary-subtle text-secondary">
+          <i class="fas fa-minus"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Time Taken</div>
+          <div class="stat-value text-primary fs-4">{{ attempt.formatted_time_taken }}</div>
+        </div>
+        <div class="stat-icon-wrapper bg-primary-subtle text-primary">
+          <i class="fas fa-clock"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-5">
+    <!-- Visual Performance Doughnut -->
+    <div class="col-lg-6">
+      <div class="chart-container-card">
+        <div class="chart-header">
+          <h5 class="fw-bold mb-0"><i class="fas fa-chart-pie text-primary me-2"></i> Performance Distribution</h5>
+        </div>
+        <div style="height: 220px; position: relative;">
+          <canvas id="resultChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proctoring Integrity Assessment Card -->
+    <div class="col-lg-6">
+      <div class="chart-container-card">
+        <div class="chart-header">
+          <h5 class="fw-bold mb-0"><i class="fas fa-shield-halved text-success me-2"></i> Proctoring Integrity Report</h5>
+          {% if proctoring_session %}
+            <span class="badge badge-risk-{{ proctoring_session.risk_level.lower() }}">
+              {{ proctoring_session.risk_level }} RISK (Score: {{ proctoring_session.risk_score }})
+            </span>
+          {% endif %}
+        </div>
+
+        <p class="text-muted small mb-3">
+          Continuous AI analysis evaluated webcam presence, head posture, eye gaze direction, tab switching, and fullscreen compliance.
+        </p>
+
+        <div class="bg-light p-3 rounded-3 mb-3 small">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Total Security Incidents Logged:</span>
+            <strong>{{ events|length }} Events</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Integrity Verification Status:</span>
+            <strong class="text-{% if proctoring_session and proctoring_session.risk_score <= 20 %}success{% elif proctoring_session and proctoring_session.risk_score <= 50 %}warning{% else %}danger{% endif %}">
+              {{ proctoring_session.final_status if proctoring_session else 'CLEARED' }}
+            </strong>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">Administrative Oversight:</span>
+            <span class="text-secondary">Assisted review active</span>
+          </div>
+        </div>
+
+        {% if events %}
+          <div class="small fw-semibold text-secondary mb-2">Flagged Anomaly Samples:</div>
+          <div class="d-flex flex-wrap gap-2">
+            {% for ev in events[:4] %}
+              <span class="badge bg-light text-dark border">
+                <i class="fas fa-circle-exclamation text-{{ 'danger' if ev.severity == 'HIGH' else ('warning' if ev.severity == 'MEDIUM' else 'info') }} me-1"></i>
+                {{ ev.event_type.replace('_', ' ') }} ({{ ev.formatted_time }})
+              </span>
+            {% endfor %}
+            {% if events|length > 4 %}
+              <span class="badge bg-light text-muted border">+{{ events|length - 4 }} more</span>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="alert alert-success p-2 small mb-0">
+            <i class="fas fa-check-circle me-1"></i> Excellent! Zero suspicious anomalies recorded during this examination session.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Question-by-Question Review -->
+  <div class="card card-glass p-4 border-0 shadow-sm mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold text-dark mb-0"><i class="fas fa-list-ol text-primary me-2"></i> Question-by-Question Breakdown</h5>
+      <span class="badge bg-light text-dark border">{{ question_breakdown|length }} Questions Evaluated</span>
+    </div>
+
+    <div class="d-flex flex-column gap-3">
+      {% for item in question_breakdown %}
+        <div class="p-3 rounded-3 border bg-light">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="fw-bold text-dark">Question {{ loop.index }}</span>
+            <div>
+              {% if item.status == 'correct' %}
+                <span class="badge bg-success-subtle text-success"><i class="fas fa-check me-1"></i> Correct (+{{ item.marks_awarded }})</span>
+              {% elif item.status == 'incorrect' %}
+                <span class="badge bg-danger-subtle text-danger"><i class="fas fa-xmark me-1"></i> Incorrect ({{ item.marks_awarded }})</span>
+              {% else %}
+                <span class="badge bg-secondary-subtle text-secondary"><i class="fas fa-minus me-1"></i> Unanswered (0.0)</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3 text-secondary">{{ item.question.question_text }}</div>
+
+          <div class="row g-2 small">
+            <div class="col-md-6">
+              <div class="p-2 bg-white rounded border {% if item.selected_answer == 'A' %}{% if item.is_correct %}border-success bg-success-subtle{% else %}border-danger bg-danger-subtle{% endif %}{% endif %}">
+                <strong>A:</strong> {{ item.question.option_a }}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-2 bg-white rounded border {% if item.selected_answer == 'B' %}{% if item.is_correct %}border-success bg-success-subtle{% else %}border-danger bg-danger-subtle{% endif %}{% endif %}">
+                <strong>B:</strong> {{ item.question.option_b }}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-2 bg-white rounded border {% if item.selected_answer == 'C' %}{% if item.is_correct %}border-success bg-success-subtle{% else %}border-danger bg-danger-subtle{% endif %}{% endif %}">
+                <strong>C:</strong> {{ item.question.option_c }}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-2 bg-white rounded border {% if item.selected_answer == 'D' %}{% if item.is_correct %}border-success bg-success-subtle{% else %}border-danger bg-danger-subtle{% endif %}{% endif %}">
+                <strong>D:</strong> {{ item.question.option_d }}
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-2 pt-2 border-top d-flex justify-content-between small text-muted">
+            <span>Your Response: <strong>{{ item.selected_answer or 'None' }}</strong></span>
+            <span>Correct Answer: <strong class="text-success">{{ item.question.correct_answer }}</strong></span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="text-center pt-2">
+    <a href="{{ url_for('student.dashboard') }}" class="btn btn-primary px-4 me-2">
+      <i class="fas fa-columns me-1"></i> Return to Dashboard
+    </a>
+    <a href="{{ url_for('student.history') }}" class="btn btn-outline-secondary px-4">
+      <i class="fas fa-clock-rotate-left me-1"></i> View All Attempts
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const ctx = document.getElementById('resultChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Correct', 'Incorrect', 'Unanswered'],
+        datasets: [{
+          data: [{{ correct_count }}, {{ incorrect_count }}, {{ unanswered_count }}],
+          backgroundColor: ['#10b981', '#ef4444', '#94a3b8'],
+          borderWidth: 2,
+          borderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom' }
+        },
+        cutout: '65%'
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

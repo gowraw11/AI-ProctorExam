@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}System Readiness &amp; Face Verification &bull; {{ exam.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card card-glass p-4 p-md-5 border-0 shadow-lg">
+        <!-- Title -->
+        <div class="text-center mb-4">
+          <span class="badge bg-primary-subtle text-primary px-3 py-1 rounded-pill fw-semibold mb-2">Step 2 of 2: Hardware &amp; AI Check</span>
+          <h3 class="fw-bold text-dark">Pre-Examination Identity &amp; Environment Verification</h3>
+          <p class="text-muted small">Please position yourself in front of your camera to verify lighting, centering, and single-face presence.</p>
+        </div>
+
+        <div class="row g-4 align-items-center mb-4">
+          <!-- Video Stream & Camera Preview -->
+          <div class="col-lg-6">
+            <div class="position-relative bg-dark rounded-4 overflow-hidden border shadow-sm" style="min-height: 280px;">
+              <video id="verifyVideo" class="w-100 h-100 d-block" style="aspect-ratio: 4/3; object-fit: cover;" autoplay playsinline muted></video>
+              <canvas id="verifyCanvas" style="display: none;"></canvas>
+
+              <div id="cameraStatusOverlay" class="position-absolute top-0 start-0 m-3">
+                <span class="badge bg-dark bg-opacity-75 text-white border" id="camBadge">
+                  <i class="fas fa-video me-1"></i> Requesting Camera...
+                </span>
+              </div>
+
+              <!-- Reticle / Face positioning guide -->
+              <div class="position-absolute top-50 start-50 translate-middle border border-2 border-primary rounded-circle opacity-50 pointer-events-none" style="width: 170px; height: 210px;"></div>
+            </div>
+
+            <!-- Manual Trigger / Retry Buttons -->
+            <div class="d-flex gap-2 mt-3">
+              <button type="button" id="btnRunCheck" class="btn btn-outline-primary flex-fill">
+                <i class="fas fa-rotate me-1"></i> Re-scan Verification
+              </button>
+              {% if demo_mode %}
+                <button type="button" id="btnSimulate" class="btn btn-outline-warning flex-fill">
+                  <i class="fas fa-flask me-1"></i> Demo Bypass Check
+                </button>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Checklist & Verification Criteria -->
+          <div class="col-lg-6">
+            <div class="bg-light p-4 rounded-3 border">
+              <h6 class="fw-bold text-dark mb-3">Verification Checklist</h6>
+
+              <div class="d-flex flex-column gap-3">
+                <div class="d-flex align-items-center justify-content-between p-2 bg-white rounded border" id="chkCam">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-camera text-muted fs-5"></i>
+                    <span class="small fw-semibold">Webcam Hardware Detected</span>
+                  </div>
+                  <span class="badge bg-secondary status-pill">Pending</span>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between p-2 bg-white rounded border" id="chkFace">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-user-check text-muted fs-5"></i>
+                    <span class="small fw-semibold">Candidate Face Detected</span>
+                  </div>
+                  <span class="badge bg-secondary status-pill">Pending</span>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between p-2 bg-white rounded border" id="chkSingle">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-users-slash text-muted fs-5"></i>
+                    <span class="small fw-semibold">Single Candidate Only</span>
+                  </div>
+                  <span class="badge bg-secondary status-pill">Pending</span>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between p-2 bg-white rounded border" id="chkLight">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-sun text-muted fs-5"></i>
+                    <span class="small fw-semibold">Lighting &amp; Visibility</span>
+                  </div>
+                  <span class="badge bg-secondary status-pill">Pending</span>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between p-2 bg-white rounded border" id="chkCenter">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-crosshairs text-muted fs-5"></i>
+                    <span class="small fw-semibold">Centering &amp; Head Position</span>
+                  </div>
+                  <span class="badge bg-secondary status-pill">Pending</span>
+                </div>
+              </div>
+
+              <!-- Message Box -->
+              <div id="verifyFeedback" class="alert alert-info border-0 p-3 mt-3 mb-0 small">
+                <i class="fas fa-circle-info me-1"></i> Initializing camera hardware. Please look directly into your webcam.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Start Exam Button & Form -->
+        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+          <a href="{{ url_for('exam.instructions', exam_id=exam.id) }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back
+          </a>
+
+          <form method="POST" action="{{ url_for('exam.start_exam', exam_id=exam.id) }}">
+            <button type="submit" id="btnStartExam" class="btn btn-success btn-lg px-4 fw-bold shadow disabled">
+              <i class="fas fa-lock-open me-2"></i> Launch Proctored Examination
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const video = document.getElementById('verifyVideo');
+  const canvas = document.getElementById('verifyCanvas');
+  const camBadge = document.getElementById('camBadge');
+  const feedback = document.getElementById('verifyFeedback');
+  const btnStart = document.getElementById('btnStartExam');
+  const btnRunCheck = document.getElementById('btnRunCheck');
+  const btnSimulate = document.getElementById('btnSimulate');
+
+  let stream = null;
+  let checkInterval = null;
+
+  async function initCamera() {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480 },
+        audio: false
+      });
+      video.srcObject = stream;
+      camBadge.className = 'badge bg-success text-white border';
+      camBadge.innerHTML = '<i class="fas fa-check-circle me-1"></i> Camera Active';
+      updatePill('chkCam', true, 'Connected');
+
+      // Run verification every 2 seconds
+      setTimeout(runVerificationCheck, 1000);
+      checkInterval = setInterval(runVerificationCheck, 2500);
+    } catch (err) {
+      console.warn("Camera error:", err);
+      camBadge.className = 'badge bg-danger text-white border';
+      camBadge.innerHTML = '<i class="fas fa-times-circle me-1"></i> Camera Unavailable';
+      updatePill('chkCam', false, 'Blocked');
+      feedback.className = 'alert alert-danger border-0 p-3 mt-3 mb-0 small';
+      feedback.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Camera access was blocked or is unavailable. Please grant permissions in your browser.';
+    }
+  }
+
+  function updatePill(elemId, passed, text) {
+    const el = document.getElementById(elemId);
+    if (!el) return;
+    const pill = el.querySelector('.status-pill');
+    if (passed) {
+      pill.className = 'badge bg-success status-pill';
+      pill.innerText = text || 'Verified';
+    } else {
+      pill.className = 'badge bg-danger status-pill';
+      pill.innerText = text || 'Failed';
+    }
+  }
+
+  async function runVerificationCheck() {
+    if (!video.videoWidth) return;
+    canvas.width = 480;
+    canvas.height = 360;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const b64 = canvas.toDataURL('image/jpeg', 0.75);
+
+    try {
+      const res = await fetch('/api/proctoring/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: b64 })
+      });
+
+      const data = await res.json();
+      applyVerificationResponse(data);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function applyVerificationResponse(data) {
+    updatePill('chkCam', data.camera_detected, data.camera_detected ? 'Connected' : 'Missing');
+    updatePill('chkFace', data.face_detected, data.face_detected ? 'Detected' : 'No Face');
+    updatePill('chkSingle', data.single_face, data.single_face ? 'Single (1)' : `${data.face_count || 0} Faces`);
+    updatePill('chkLight', data.lighting_ok, data.lighting_ok ? 'Good' : 'Adjust');
+    updatePill('chkCenter', data.is_centered, data.is_centered ? 'Centered' : 'Re-center');
+
+    if (data.status === 'READY') {
+      feedback.className = 'alert alert-success border-0 p-3 mt-3 mb-0 small';
+      feedback.innerHTML = '<i class="fas fa-check-circle me-1"></i> <strong>Identity & Environment Verified!</strong> You can now launch your exam.';
+      btnStart.classList.remove('disabled');
+      if (checkInterval) {
+        clearInterval(checkInterval);
+        checkInterval = null;
+      }
+    } else {
+      feedback.className = 'alert alert-warning border-0 p-3 mt-3 mb-0 small';
+      feedback.innerHTML = `<i class="fas fa-circle-exclamation me-1"></i> ${data.message || 'Please position your face centrally in the frame.'}`;
+    }
+  }
+
+  btnRunCheck.addEventListener('click', runVerificationCheck);
+
+  if (btnSimulate) {
+    btnSimulate.addEventListener('click', async () => {
+      const res = await fetch('/api/proctoring/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ demo_mode: true })
+      });
+      const data = await res.json();
+      applyVerificationResponse(data);
+    });
+  }
+
+  initCamera();
+});
+</script>
+{% endblock %}

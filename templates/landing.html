@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block title %}AI-Powered Online Examination & Proctoring System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="py-5 position-relative overflow-hidden" style="background: radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.08) 0%, rgba(248, 250, 252, 1) 90%);">
+  <div class="container py-lg-4">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.2);">
+          <span class="live-indicator"></span>
+          <span class="fw-semibold text-primary" style="font-size: 0.82rem;">Real-Time Computer Vision Proctoring</span>
+        </div>
+        <h1 class="display-4 fw-extrabold text-dark lh-sm mb-3">
+          AI-Powered Online Examination &amp; Proctoring
+        </h1>
+        <p class="lead text-muted mb-4 fs-6">
+          A secure, intelligent and reliable EdTech examination platform equipped with continuous AI face detection, head-pose estimation, gaze tracking, and automated risk scoring.
+        </p>
+
+        <div class="d-flex flex-wrap gap-3 mb-4">
+          <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg px-4 shadow">
+            <i class="fas fa-play me-2"></i> Start Examination
+          </a>
+          <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg px-4">
+            <i class="fas fa-user-lock me-2"></i> Admin Portal
+          </a>
+        </div>
+
+        <!-- Quick Demo Credentials Box -->
+        <div class="card border-0 bg-white shadow-sm p-3 rounded-3" style="border-left: 4px solid var(--primary) !important;">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <span class="fw-bold text-dark d-block" style="font-size: 0.85rem;"><i class="fas fa-key text-warning me-1"></i> Quick Demo Access:</span>
+              <small class="text-muted">Admin: <code>admin@example.com</code> | Student: <code>student@example.com</code></small>
+            </div>
+            <span class="badge bg-light text-primary border">Pass: Admin@123 / Student@123</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <!-- Animated Mockup / HUD Visual Component -->
+        <div class="position-relative">
+          <div class="card shadow-lg border-0 rounded-4 overflow-hidden" style="background: #0f172a; color: #fff;">
+            <!-- Header bar -->
+            <div class="d-flex align-items-center justify-content-between px-3 py-2 bg-dark border-bottom border-secondary border-opacity-25">
+              <div class="d-flex gap-1">
+                <span class="rounded-circle bg-danger" style="width: 10px; height: 10px;"></span>
+                <span class="rounded-circle bg-warning" style="width: 10px; height: 10px;"></span>
+                <span class="rounded-circle bg-success" style="width: 10px; height: 10px;"></span>
+              </div>
+              <small class="text-secondary fw-semibold font-monospace" style="font-size: 0.75rem;">AI-PROCTOR-ENGINE v1.0 &bull; LIVE</small>
+              <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;"><i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i> SECURE</span>
+            </div>
+
+            <div class="p-4">
+              <div class="row g-3">
+                <!-- Simulated Candidate Camera Preview -->
+                <div class="col-sm-7">
+                  <div class="position-relative rounded-3 overflow-hidden bg-black border border-secondary border-opacity-25" style="height: 180px;">
+                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-center p-3">
+                      <div class="rounded-circle border border-2 border-success p-3 mb-2" style="background: rgba(16, 185, 129, 0.1);">
+                        <i class="fas fa-user-check text-success fs-2"></i>
+                      </div>
+                      <small class="text-success fw-bold font-monospace">FACE VERIFIED &bull; 98.4% CONF</small>
+                    </div>
+
+                    <!-- HUD Overlays -->
+                    <div class="position-absolute top-0 start-0 m-2">
+                      <span class="badge bg-dark bg-opacity-75 text-light" style="font-size: 0.65rem;">
+                        <i class="fas fa-camera text-primary me-1"></i> 640x480 @ 30fps
+                      </span>
+                    </div>
+                    <div class="position-absolute bottom-0 start-0 w-100 p-2 bg-gradient" style="background: linear-gradient(to top, #000, transparent);">
+                      <div class="d-flex justify-content-between text-light" style="font-size: 0.7rem;">
+                        <span>Head: <strong>CENTER</strong></span>
+                        <span>Gaze: <strong>ON SCREEN</strong></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Live Risk Metrics Widget -->
+                <div class="col-sm-5 d-flex flex-column justify-content-between">
+                  <div class="bg-secondary bg-opacity-10 border border-secondary border-opacity-25 p-3 rounded-3 mb-2">
+                    <small class="text-secondary d-block mb-1">PROCTORING RISK</small>
+                    <div class="d-flex align-items-baseline gap-2">
+                      <span class="fs-3 fw-bold text-success font-monospace">04</span>
+                      <span class="badge bg-success text-white" style="font-size: 0.7rem;">LOW RISK</span>
+                    </div>
+                    <div class="progress mt-2" style="height: 6px;">
+                      <div class="progress-bar bg-success" style="width: 15%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="bg-secondary bg-opacity-10 border border-secondary border-opacity-25 p-2 rounded-3 text-secondary" style="font-size: 0.75rem;">
+                    <div class="d-flex justify-content-between mb-1">
+                      <span>Face Count:</span> <strong class="text-light">1 Face</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                      <span>Tab Switches:</span> <strong class="text-light">0</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <span>Fullscreen:</span> <strong class="text-success">LOCKED</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Anomaly Log Strip -->
+              <div class="mt-3 p-2 bg-dark rounded border border-secondary border-opacity-25 font-monospace text-muted" style="font-size: 0.75rem;">
+                <span class="text-success">&bull; 14:40:02</span> Candidate verified & session initialized.<br>
+                <span class="text-info">&bull; 14:40:15</span> Question answered & saved securely.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5 bg-white border-top">
+  <div class="container py-lg-4">
+    <div class="text-center max-w-700 mx-auto mb-5">
+      <span class="badge bg-primary-subtle text-primary px-3 py-1 rounded-pill fw-semibold mb-2">Core Capabilities</span>
+      <h2 class="fw-bold">Intelligent Examination Architecture</h2>
+      <p class="text-muted">Built with robust computer vision pipelines and a modern full-stack web stack to deliver an uncompromising examination environment.</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card card-glass card-hover h-100 p-4">
+          <div class="brand-icon-badge mb-3" style="background: linear-gradient(135deg, #4f46e5, #6366f1);">
+            <i class="fas fa-face-smile"></i>
+          </div>
+          <h5 class="fw-bold">OpenCV Face Detection</h5>
+          <p class="text-muted small">Continuously detects the candidate's face. Flags violations when no face is present or when multiple individuals enter the camera field of view.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card card-glass card-hover h-100 p-4">
+          <div class="brand-icon-badge mb-3" style="background: linear-gradient(135deg, #0ea5e9, #06b6d4);">
+            <i class="fas fa-arrows-to-eye"></i>
+          </div>
+          <h5 class="fw-bold">Head Pose & Gaze Analysis</h5>
+          <p class="text-muted small">Tracks sustained head rotation and diverted eye gaze away from the examination screen with temporal smoothing to prevent false positives.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card card-glass card-hover h-100 p-4">
+          <div class="brand-icon-badge mb-3" style="background: linear-gradient(135deg, #10b981, #059669);">
+            <i class="fas fa-gauge-high"></i>
+          </div>
+          <h5 class="fw-bold">Dynamic Risk Engine</h5>
+          <p class="text-muted small">Computes cumulative risk scores dynamically based on event severity weights, categorizing sessions into Low, Medium, High, and Critical risk tiers.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card card-glass card-hover h-100 p-4">
+          <div class="brand-icon-badge mb-3" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+            <i class="fas fa-window-restore"></i>
+          </div>
+          <h5 class="fw-bold">Tab &amp; Fullscreen Guard</h5>
+          <p class="text-muted small">Enforces full-screen mode and detects browser tab switching, clipboard operations (copy/cut/paste), and right-click context attempts.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card card-glass card-hover h-100 p-4">
+          <div class="brand-icon-badge mb-3" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">
+            <i class="fas fa-floppy-disk"></i>
+          </div>
+          <h5 class="fw-bold">Auto-Save &amp; Timed Submit</h5>
+          <p class="text-muted small">Candidate responses are asynchronously persisted in real-time. Server-side countdown timers guarantee unforgeable automated submissions upon expiry.</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card card-glass card-hover h-100 p-4">
+          <div class="brand-icon-badge mb-3" style="background: linear-gradient(135deg, #ef4444, #b91c1c);">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h5 class="fw-bold">Evidence &amp; Audit Reports</h5>
+          <p class="text-muted small">Stores photographic webcam evidence for serious anomalies, provides interactive audit timelines, and produces CSV and PDF reports.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="how-it-works" class="py-5 bg-light border-top">
+  <div class="container py-lg-4">
+    <div class="text-center mb-5">
+      <span class="badge bg-secondary-subtle text-secondary px-3 py-1 rounded-pill fw-semibold mb-2">Process Lifecycle</span>
+      <h2 class="fw-bold">How The Platform Works</h2>
+      <p class="text-muted">A seamless 6-step flow guaranteeing fairness, ease-of-use, and academic integrity.</p>
+    </div>
+
+    <div class="row g-4 text-center">
+      <div class="col-md-2 col-6">
+        <div class="p-3 bg-white rounded-3 shadow-sm h-100 border">
+          <div class="fw-bold text-primary fs-3 mb-2">01</div>
+          <h6 class="fw-bold mb-1">Register</h6>
+          <small class="text-muted">Sign up with full name and student registration ID.</small>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <div class="p-3 bg-white rounded-3 shadow-sm h-100 border">
+          <div class="fw-bold text-primary fs-3 mb-2">02</div>
+          <h6 class="fw-bold mb-1">Verify</h6>
+          <small class="text-muted">Pre-exam checks verify webcam, single face, &amp; lighting.</small>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <div class="p-3 bg-white rounded-3 shadow-sm h-100 border">
+          <div class="fw-bold text-primary fs-3 mb-2">03</div>
+          <h6 class="fw-bold mb-1">Start Exam</h6>
+          <small class="text-muted">Lock into fullscreen mode and load question palette.</small>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <div class="p-3 bg-white rounded-3 shadow-sm h-100 border">
+          <div class="fw-bold text-primary fs-3 mb-2">04</div>
+          <h6 class="fw-bold mb-1">AI Monitor</h6>
+          <small class="text-muted">Subtle background frame sampling logs any anomalies.</small>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <div class="p-3 bg-white rounded-3 shadow-sm h-100 border">
+          <div class="fw-bold text-primary fs-3 mb-2">05</div>
+          <h6 class="fw-bold mb-1">Submit</h6>
+          <small class="text-muted">Review summary or auto-submit when the timer elapses.</small>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <div class="p-3 bg-white rounded-3 shadow-sm h-100 border">
+          <div class="fw-bold text-primary fs-3 mb-2">06</div>
+          <h6 class="fw-bold mb-1">Get Result</h6>
+          <small class="text-muted">Instant scoring, breakdown, and proctoring integrity report.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Security & Privacy Section -->
+<section id="security" class="py-5 bg-white border-top">
+  <div class="container py-lg-4">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="badge bg-danger-subtle text-danger px-3 py-1 rounded-pill fw-semibold mb-2">Security &amp; Ethics</span>
+        <h2 class="fw-bold mb-3">AI-Assisted Human Review, Not Blind Disqualification</h2>
+        <p class="text-muted mb-4">
+          In strict compliance with educational testing ethics, our proctoring engine flags <em>potential suspicious activity</em> rather than making irreversible accusations. Every flagged incident includes confidence metrics and optional photographic snapshots for human administrative review.
+        </p>
+
+        <ul class="list-unstyled d-flex flex-column gap-3 text-muted">
+          <li class="d-flex align-items-start gap-3">
+            <i class="fas fa-shield-check text-success fs-5 mt-1"></i>
+            <div><strong>Zero Continuous Video Uploads:</strong> Only periodic lightweight frame samples (1-2 FPS) are transmitted to ensure minimal bandwidth and student privacy.</div>
+          </li>
+          <li class="d-flex align-items-start gap-3">
+            <i class="fas fa-user-lock text-primary fs-5 mt-1"></i>
+            <div><strong>Data Privacy Notice:</strong> Photographs are solely captured when severe security threshold events trigger, stored locally in protected storage.</div>
+          </li>
+          <li class="d-flex align-items-start gap-3">
+            <i class="fas fa-sliders text-warning fs-5 mt-1"></i>
+            <div><strong>Configurable False-Positive Tolerances:</strong> Admins can tune sensitivity weights and customize pass/fail policies.</div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card border-0 bg-dark text-white p-4 rounded-4 shadow">
+          <h5 class="fw-bold mb-3"><i class="fas fa-terminal text-info me-2"></i> Event Penalty Calibration Matrix</h5>
+          <div class="table-responsive">
+            <table class="table table-dark table-sm table-borderless font-monospace mb-0" style="font-size: 0.85rem;">
+              <thead>
+                <tr class="text-secondary border-bottom border-secondary">
+                  <th>ANOMALY EVENT</th>
+                  <th>SEVERITY</th>
+                  <th>RISK POINTS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>MULTIPLE_FACES</td><td><span class="badge bg-danger">HIGH</span></td><td>+30</td></tr>
+                <tr><td>CAMERA_DISABLED</td><td><span class="badge bg-danger">HIGH</span></td><td>+25</td></tr>
+                <tr><td>COPY_ATTEMPT / PASTE</td><td><span class="badge bg-danger">HIGH</span></td><td>+20</td></tr>
+                <tr><td>TAB_SWITCH / EXIT</td><td><span class="badge bg-warning text-dark">MEDIUM</span></td><td>+15</td></tr>
+                <tr><td>NO_FACE_VISIBLE</td><td><span class="badge bg-danger">HIGH</span></td><td>+10</td></tr>
+                <tr><td>LOOKING_AWAY / POSE</td><td><span class="badge bg-warning text-dark">MEDIUM</span></td><td>+05</td></tr>
+                <tr><td>RIGHT_CLICK_MENU</td><td><span class="badge bg-info text-dark">LOW</span></td><td>+05</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

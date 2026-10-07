@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Students &bull; Admin Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-title">Main Navigation</div>
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link">
+          <i class="fas fa-chart-pie sidebar-icon"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.exams') }}" class="sidebar-link">
+          <i class="fas fa-book-open sidebar-icon"></i>
+          <span>Exams</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.students') }}" class="sidebar-link active">
+          <i class="fas fa-user-graduate sidebar-icon"></i>
+          <span>Students</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.attempts') }}" class="sidebar-link">
+          <i class="fas fa-list-check sidebar-icon"></i>
+          <span>Attempts</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.proctoring') }}" class="sidebar-link">
+          <i class="fas fa-video sidebar-icon"></i>
+          <span>Proctoring Monitor</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.reports') }}" class="sidebar-link">
+          <i class="fas fa-file-invoice sidebar-icon"></i>
+          <span>Reports &amp; Export</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-title mt-4">System</div>
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.settings') }}" class="sidebar-link">
+          <i class="fas fa-sliders sidebar-icon"></i>
+          <span>Settings</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('about') }}" class="sidebar-link">
+          <i class="fas fa-circle-info sidebar-icon"></i>
+          <span>Architecture</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger">
+          <i class="fas fa-power-off sidebar-icon"></i>
+          <span>Logout</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+      <div>
+        <h3 class="fw-bold text-dark mb-1">Student Management</h3>
+        <p class="text-muted small mb-0">Manage registered candidate profiles, track exam performance, and control account status</p>
+      </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="card card-glass p-3 mb-4 border-0 shadow-sm">
+      <form method="GET" action="{{ url_for('admin.students') }}">
+        <div class="row g-2 align-items-center">
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-search"></i></span>
+              <input type="text" name="q" class="form-control border-start-0" placeholder="Search by name, email, or registration number..." value="{{ query }}">
+              <button class="btn btn-primary" type="submit">Search</button>
+            </div>
+          </div>
+          {% if query %}
+            <div class="col-md-2">
+              <a href="{{ url_for('admin.students') }}" class="btn btn-outline-secondary btn-sm">Clear Filter</a>
+            </div>
+          {% endif %}
+          <div class="col text-end text-muted small">
+            Total Registered: <strong class="text-dark">{{ students|length }}</strong>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Students Table -->
+    <div class="card card-glass p-4 border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table custom-table mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Full Name</th>
+              <th>Registration ID</th>
+              <th>Email</th>
+              <th>Enrolled Date</th>
+              <th>Status</th>
+              <th class="text-end">Account Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in students %}
+              <tr>
+                <td><code>#{{ s.id }}</code></td>
+                <td class="fw-bold text-dark">
+                  <i class="fas fa-user-circle text-primary me-2"></i>{{ s.full_name }}
+                </td>
+                <td><span class="badge bg-light text-dark border font-monospace">{{ s.registration_number or 'N/A' }}</span></td>
+                <td>{{ s.email }}</td>
+                <td class="small text-muted">{{ s.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                  {% if s.is_active %}
+                    <span class="badge bg-success-subtle text-success"><i class="fas fa-check-circle me-1"></i> Active</span>
+                  {% else %}
+                    <span class="badge bg-danger-subtle text-danger"><i class="fas fa-ban me-1"></i> Suspended</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <form method="POST" action="{{ url_for('admin.toggle_student_status', student_id=s.id) }}" class="d-inline">
+                    {% if s.is_active %}
+                      <button type="submit" class="btn btn-sm btn-outline-warning" title="Suspend Account" onclick="return confirm('Deactivate student account?');">
+                        <i class="fas fa-user-slash me-1"></i> Deactivate
+                      </button>
+                    {% else %}
+                      <button type="submit" class="btn btn-sm btn-outline-success" title="Reactivate Account">
+                        <i class="fas fa-user-check me-1"></i> Activate
+                      </button>
+                    {% endif %}
+                  </form>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="7" class="text-center text-muted py-5">
+                  <i class="fas fa-user-group fs-1 mb-2 d-block"></i>
+                  No students found matching your search.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Examination History &bull; Student Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">My Examination History</h3>
+      <p class="text-muted small mb-0">Record of all completed and evaluated examination attempts</p>
+    </div>
+    <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-arrow-left me-1"></i> Dashboard
+    </a>
+  </div>
+
+  <div class="card card-glass p-4 border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table custom-table mb-0">
+        <thead>
+          <tr>
+            <th>Attempt ID</th>
+            <th>Exam Title</th>
+            <th>Subject</th>
+            <th>Date &amp; Time</th>
+            <th>Time Taken</th>
+            <th>Score</th>
+            <th>Percentage</th>
+            <th>Status</th>
+            <th>Proctoring Risk</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for att in attempts %}
+            <tr>
+              <td><code>#{{ att.id }}</code></td>
+              <td class="fw-bold text-dark">{{ att.exam.title }}</td>
+              <td><span class="badge bg-light text-dark border">{{ att.exam.subject }}</span></td>
+              <td class="small text-muted">{{ att.started_at.strftime('%Y-%m-%d %H:%M') }}</td>
+              <td class="small">{{ att.formatted_time_taken }}</td>
+              <td><strong>{{ att.score }} / {{ att.exam.total_marks }}</strong></td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="fw-bold">{{ att.percentage }}%</span>
+                </div>
+              </td>
+              <td>
+                {% if att.is_passed %}
+                  <span class="badge bg-success-subtle text-success"><i class="fas fa-check-circle me-1"></i> PASSED</span>
+                {% else %}
+                  <span class="badge bg-danger-subtle text-danger"><i class="fas fa-circle-xmark me-1"></i> FAILED</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if att.proctoring_session %}
+                  <span class="badge badge-risk-{{ att.proctoring_session.risk_level.lower() }}">
+                    {{ att.proctoring_session.risk_level }} ({{ att.proctoring_session.risk_score }})
+                  </span>
+                {% else %}
+                  <span class="badge bg-light text-muted">N/A</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a href="{{ url_for('student.result', attempt_id=att.id) }}" class="btn btn-sm btn-outline-primary">
+                  <i class="fas fa-file-lines me-1"></i> View Result
+                </a>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="10" class="text-center text-muted py-5">
+                <i class="fas fa-clipboard-list fs-1 mb-2 d-block"></i>
+                You haven't attempted any examinations yet.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

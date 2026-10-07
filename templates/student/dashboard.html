@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard &bull; Online Examination Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Welcome Banner -->
+  <div class="card card-glass p-4 mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, #4f46e5, #3730a3); color: #fff;">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <span class="badge bg-white text-primary mb-2 fw-semibold">STUDENT PORTAL</span>
+        <h2 class="fw-bold mb-1">Welcome back, {{ current_user.full_name }}!</h2>
+        <p class="text-white text-opacity-75 mb-0 small">
+          Registration ID: <strong>{{ current_user.registration_number or 'N/A' }}</strong> &bull; Email: <strong>{{ current_user.email }}</strong>
+        </p>
+      </div>
+      <div>
+        <a href="{{ url_for('student.exams') }}" class="btn btn-light text-primary fw-bold shadow-sm px-4">
+          <i class="fas fa-file-pen me-2"></i> Browse All Exams
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Metric Stat Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Available Exams</div>
+          <div class="stat-value text-primary">{{ available_exams|length }}</div>
+        </div>
+        <div class="stat-icon-wrapper bg-primary-subtle text-primary">
+          <i class="fas fa-book-open"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Completed</div>
+          <div class="stat-value text-success">{{ total_completed }}</div>
+        </div>
+        <div class="stat-icon-wrapper bg-success-subtle text-success">
+          <i class="fas fa-check-double"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Average Score</div>
+          <div class="stat-value text-info">{{ avg_score }}%</div>
+        </div>
+        <div class="stat-icon-wrapper bg-info-subtle text-info">
+          <i class="fas fa-chart-line"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Proctoring Risk</div>
+          <div class="stat-value text-{{ overall_risk_badge }}">{{ overall_risk_label }}</div>
+        </div>
+        <div class="stat-icon-wrapper bg-{{ overall_risk_badge }}-subtle text-{{ overall_risk_badge }}">
+          <i class="fas fa-shield-halved"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-Progress Warning / Resume Banner -->
+  {% if active_attempts %}
+    {% for att in active_attempts %}
+      <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center justify-content-between p-3 mb-4 rounded-3">
+        <div class="d-flex align-items-center gap-3">
+          <i class="fas fa-stopwatch text-warning fs-3"></i>
+          <div>
+            <div class="fw-bold">Active Examination In Progress!</div>
+            <div class="small">You have an ongoing attempt for <strong>{{ att.exam.title }}</strong>. Timer is active.</div>
+          </div>
+        </div>
+        <a href="{{ url_for('exam.take_exam', exam_id=att.exam.id) }}" class="btn btn-warning text-dark fw-bold">
+          <i class="fas fa-play me-1"></i> Resume Exam Now
+        </a>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Available Exams Section -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold text-dark mb-0"><i class="fas fa-laptop-code text-primary me-2"></i> Ready Examinations</h4>
+    <a href="{{ url_for('student.exams') }}" class="small fw-semibold text-primary">View All &rarr;</a>
+  </div>
+
+  <div class="row g-4 mb-5">
+    {% for ex in available_exams[:3] %}
+      <div class="col-md-4">
+        <div class="card card-glass card-hover h-100 p-4 border-0 shadow-sm d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge bg-primary-subtle text-primary">{{ ex.subject }}</span>
+            <small class="text-muted"><i class="fas fa-clock me-1"></i> {{ ex.duration_minutes }} Mins</small>
+          </div>
+          <h5 class="fw-bold text-dark mb-2">{{ ex.title }}</h5>
+          <p class="text-muted small flex-grow-1">{{ ex.description or 'Standard comprehensive multiple-choice examination with automated proctoring.' }}</p>
+
+          <div class="border-top pt-3 mt-2 d-flex justify-content-between align-items-center">
+            <div class="small text-muted">
+              <span><i class="fas fa-circle-question me-1"></i> {{ ex.question_count }} Qs</span> &bull; 
+              <span><i class="fas fa-trophy me-1"></i> {{ ex.total_marks }} Marks</span>
+            </div>
+
+            {% if ex.user_attempt and ex.user_attempt.status in ['submitted', 'auto_submitted'] %}
+              <a href="{{ url_for('student.result', attempt_id=ex.user_attempt.id) }}" class="btn btn-outline-success btn-sm fw-semibold">
+                <i class="fas fa-chart-simple me-1"></i> Result
+              </a>
+            {% else %}
+              <a href="{{ url_for('exam.instructions', exam_id=ex.id) }}" class="btn btn-primary btn-sm fw-semibold">
+                <i class="fas fa-arrow-right me-1"></i> Enter
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="col-12">
+        <div class="card p-4 text-center text-muted">
+          <i class="fas fa-folder-open fs-2 mb-2"></i>
+          <p class="mb-0">No published examinations are currently open.</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Recent Completed Results Table -->
+  <div class="card card-glass p-4 border-0 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold text-dark mb-0"><i class="fas fa-history text-secondary me-2"></i> Recent Examination Results</h5>
+      <a href="{{ url_for('student.history') }}" class="small fw-semibold text-primary">Full History &rarr;</a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table custom-table mb-0">
+        <thead>
+          <tr>
+            <th>Exam Title</th>
+            <th>Subject</th>
+            <th>Date</th>
+            <th>Score</th>
+            <th>Result</th>
+            <th>Proctoring Risk</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for att in completed_attempts %}
+            <tr>
+              <td class="fw-bold text-dark">{{ att.exam.title }}</td>
+              <td><span class="badge bg-light text-dark border">{{ att.exam.subject }}</span></td>
+              <td class="small text-muted">{{ att.submitted_at.strftime('%b %d, %Y %H:%M') if att.submitted_at else 'N/A' }}</td>
+              <td><strong class="text-primary">{{ att.score }} / {{ att.exam.total_marks }}</strong> ({{ att.percentage }}%)</td>
+              <td>
+                {% if att.is_passed %}
+                  <span class="badge bg-success-subtle text-success"><i class="fas fa-check-circle me-1"></i> PASSED</span>
+                {% else %}
+                  <span class="badge bg-danger-subtle text-danger"><i class="fas fa-times-circle me-1"></i> FAILED</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if att.proctoring_session %}
+                  <span class="badge badge-risk-{{ att.proctoring_session.risk_level.lower() }}">
+                    {{ att.proctoring_session.risk_level }} ({{ att.proctoring_session.risk_score }})
+                  </span>
+                {% else %}
+                  <span class="badge bg-light text-muted">N/A</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a href="{{ url_for('student.result', attempt_id=att.id) }}" class="btn btn-sm btn-outline-primary">
+                  View Analysis
+                </a>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" class="text-center text-muted py-4">No completed examinations yet. Start your first exam above!</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

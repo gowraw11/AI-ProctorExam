@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Exams &bull; Admin Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-title">Main Navigation</div>
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link">
+          <i class="fas fa-chart-pie sidebar-icon"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.exams') }}" class="sidebar-link active">
+          <i class="fas fa-book-open sidebar-icon"></i>
+          <span>Exams</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.students') }}" class="sidebar-link">
+          <i class="fas fa-user-graduate sidebar-icon"></i>
+          <span>Students</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.attempts') }}" class="sidebar-link">
+          <i class="fas fa-list-check sidebar-icon"></i>
+          <span>Attempts</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.proctoring') }}" class="sidebar-link">
+          <i class="fas fa-video sidebar-icon"></i>
+          <span>Proctoring Monitor</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.reports') }}" class="sidebar-link">
+          <i class="fas fa-file-invoice sidebar-icon"></i>
+          <span>Reports &amp; Export</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-title mt-4">System</div>
+    <ul class="sidebar-menu">
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.settings') }}" class="sidebar-link">
+          <i class="fas fa-sliders sidebar-icon"></i>
+          <span>Settings</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('about') }}" class="sidebar-link">
+          <i class="fas fa-circle-info sidebar-icon"></i>
+          <span>Architecture</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger">
+          <i class="fas fa-power-off sidebar-icon"></i>
+          <span>Logout</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+      <div>
+        <h3 class="fw-bold text-dark mb-1">Manage Examinations</h3>
+        <p class="text-muted small mb-0">Create, configure, publish, and populate question banks for exams</p>
+      </div>
+      <div>
+        <a href="{{ url_for('admin.create_exam') }}" class="btn btn-primary">
+          <i class="fas fa-plus me-1"></i> Create New Exam
+        </a>
+      </div>
+    </div>
+
+    <!-- Filter input -->
+    <div class="card card-glass p-3 mb-4 border-0 shadow-sm">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-5">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0 text-muted"><i class="fas fa-search"></i></span>
+            <input type="text" id="examSearchInput" class="form-control border-start-0" placeholder="Search by exam title or subject...">
+          </div>
+        </div>
+        <div class="col-md-7 text-md-end text-muted small">
+          Total Exams Configured: <strong class="text-dark">{{ exams|length }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exams Table -->
+    <div class="card card-glass p-4 border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table custom-table mb-0" id="examsTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Exam Title</th>
+              <th>Subject</th>
+              <th>Duration</th>
+              <th>Questions</th>
+              <th>Marks (Pass)</th>
+              <th>Status</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ex in exams %}
+              <tr>
+                <td><code>#{{ ex.id }}</code></td>
+                <td>
+                  <div class="fw-bold text-dark">{{ ex.title }}</div>
+                  <small class="text-muted">{{ ex.description[:60] if ex.description else 'No description' }}...</small>
+                </td>
+                <td><span class="badge bg-light text-dark border">{{ ex.subject }}</span></td>
+                <td><i class="fas fa-clock text-muted me-1"></i> {{ ex.duration_minutes }}m</td>
+                <td>
+                  <a href="{{ url_for('admin.exam_questions', exam_id=ex.id) }}" class="badge bg-primary-subtle text-primary text-decoration-none">
+                    {{ ex.question_count }} Questions &rarr;
+                  </a>
+                </td>
+                <td>
+                  <strong>{{ ex.total_marks }}</strong> (<span class="text-success">{{ ex.passing_marks }}</span>)
+                </td>
+                <td>
+                  <form method="POST" action="{{ url_for('admin.toggle_exam_status', exam_id=ex.id) }}" class="d-inline">
+                    <button type="submit" class="btn btn-sm p-0 border-0 bg-transparent" title="Click to toggle status">
+                      {% if ex.status == 'published' %}
+                        <span class="badge bg-success-subtle text-success"><i class="fas fa-check-circle me-1"></i> Published</span>
+                      {% else %}
+                        <span class="badge bg-secondary-subtle text-secondary"><i class="fas fa-pencil me-1"></i> Draft</span>
+                      {% endif %}
+                    </button>
+                  </form>
+                </td>
+                <td class="text-end">
+                  <div class="d-inline-flex gap-1">
+                    <a href="{{ url_for('admin.exam_questions', exam_id=ex.id) }}" class="btn btn-sm btn-outline-primary" title="Manage Questions">
+                      <i class="fas fa-list-check"></i>
+                    </a>
+                    <a href="{{ url_for('admin.edit_exam', exam_id=ex.id) }}" class="btn btn-sm btn-outline-secondary" title="Edit Exam Details">
+                      <i class="fas fa-pen"></i>
+                    </a>
+                    <form method="POST" action="{{ url_for('admin.delete_exam', exam_id=ex.id) }}" class="d-inline" onsubmit="return confirm('Delete this exam and all its questions and attempts? This cannot be undone.');">
+                      <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Exam">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="8" class="text-center text-muted py-5">
+                  <i class="fas fa-book-open fs-1 mb-2 d-block"></i>
+                  No exams created yet. Click "Create New Exam" above to add your first assessment.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  window.DashboardAnalytics.initTableFilter('examSearchInput', 'examsTable');
+});
+</script>
+{% endblock %}

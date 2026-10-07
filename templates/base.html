@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}AI-Powered Online Examination & Proctoring System{% endblock %}</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Custom Stylesheets -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+  <!-- Main Navigation Bar -->
+  {% block navbar %}
+  <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+    <div class="container-fluid px-lg-4">
+      <a class="navbar-brand" href="{{ url_for('index') }}">
+        <div class="brand-icon-badge">
+          <i class="fas fa-shield-halved"></i>
+        </div>
+        <span>AI Proctor<span class="text-primary">Exam</span></span>
+      </a>
+
+      <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNavbar">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+          {% if current_user.is_authenticated %}
+            {% if current_user.is_admin %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}"><i class="fas fa-chart-pie me-1"></i> Dashboard</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.exams') }}"><i class="fas fa-book-open me-1"></i> Exams</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.students') }}"><i class="fas fa-user-graduate me-1"></i> Students</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.attempts') }}"><i class="fas fa-list-check me-1"></i> Attempts</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.proctoring') }}"><i class="fas fa-video me-1"></i> Proctoring</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.reports') }}"><i class="fas fa-file-invoice me-1"></i> Reports</a></li>
+            {% else %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('student.dashboard') }}"><i class="fas fa-columns me-1"></i> Dashboard</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('student.exams') }}"><i class="fas fa-file-signature me-1"></i> Available Exams</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('student.history') }}"><i class="fas fa-clock-rotate-left me-1"></i> My History</a></li>
+            {% endif %}
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}#features">Features</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}#how-it-works">How It Works</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}#security">AI Security</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('about') }}">About Project</a></li>
+          {% endif %}
+        </ul>
+
+        <div class="d-flex align-items-center gap-2">
+          {% if demo_mode %}
+            <span class="badge bg-warning text-dark px-2 py-1"><i class="fas fa-flask me-1"></i> DEMO MODE ACTIVE</span>
+          {% endif %}
+
+          {% if current_user.is_authenticated %}
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2 px-3 py-2 rounded-pill" type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-user-circle fs-5 text-primary"></i>
+                <div class="text-start lh-1">
+                  <div class="fw-bold" style="font-size: 0.82rem;">{{ current_user.full_name }}</div>
+                  <small class="text-muted text-uppercase" style="font-size: 0.65rem;">{{ current_user.role }}</small>
+                </div>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                {% if current_user.is_admin %}
+                  <li><a class="dropdown-item" href="{{ url_for('admin.settings') }}"><i class="fas fa-sliders me-2 text-muted"></i> System Settings</a></li>
+                {% endif %}
+                <li><a class="dropdown-item" href="{{ url_for('about') }}"><i class="fas fa-info-circle me-2 text-muted"></i> About Architecture</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-arrow-right-from-bracket me-2"></i> Log Out</a></li>
+              </ul>
+            </div>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary px-3 py-2"><i class="fas fa-arrow-right-to-bracket me-1"></i> Login</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary px-3 py-2"><i class="fas fa-user-plus me-1"></i> Register</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+  {% endblock %}
+
+  <!-- Flash Toast / Alert Messages -->
+  <div class="toast-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="custom-toast {{ category }}">
+            <div class="d-flex align-items-center gap-2">
+              {% if category == 'success' %}
+                <i class="fas fa-check-circle text-success fs-5"></i>
+              {% elif category == 'danger' %}
+                <i class="fas fa-circle-exclamation text-danger fs-5"></i>
+              {% elif category == 'warning' %}
+                <i class="fas fa-triangle-exclamation text-warning fs-5"></i>
+              {% else %}
+                <i class="fas fa-info-circle text-primary fs-5"></i>
+              {% endif %}
+              <span style="font-size: 0.88rem; font-weight: 500;">{{ message }}</span>
+            </div>
+            <button type="button" class="btn-close ms-2" onclick="this.parentElement.remove()" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Page Content Block -->
+  <main class="flex-grow-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Global Footer -->
+  {% block footer %}
+  <footer>
+    <div class="container text-center">
+      <div class="row align-items-center">
+        <div class="col-md-6 text-md-start mb-2 mb-md-0">
+          <span class="fw-bold text-dark">AI-Powered Online Examination & Proctoring System</span>
+          <div class="small text-muted">Final Year Computer Science / MCA Engineering Project</div>
+        </div>
+        <div class="col-md-6 text-md-end small text-muted">
+          <span>Secure OpenCV & Flask ML Engine &bull; Version 1.0.0 &bull; &copy; {{ current_year }}</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+  {% endblock %}
+
+  <!-- Bootstrap 5 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Application JS -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
